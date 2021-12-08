@@ -22,7 +22,6 @@ public class QueuedThread {
 							next.run();
 						} catch (Exception ex) {
 							synchronized (this.anchor) {
-								// TODO: Log
 								//SkyblockRecords.getLog().error("Error running queued action: {{0}}", ex.getMessage());
 								ex.printStackTrace();
 							}
