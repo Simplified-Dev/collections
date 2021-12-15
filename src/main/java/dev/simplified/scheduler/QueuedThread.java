@@ -1,6 +1,5 @@
 package dev.sbs.api.scheduler;
 
-import dev.sbs.api.SimplifiedApi;
 import dev.sbs.api.util.concurrent.Concurrent;
 import dev.sbs.api.util.concurrent.ConcurrentQueue;
 
@@ -14,7 +13,7 @@ public class QueuedThread {
 	public QueuedThread() {
 		this.thread = new Thread(() -> {
 			while (true) {
-				SimplifiedApi.sleep(1);
+				Scheduler.sleep(1);
 
 				if (this.isRunning()) {
 					if (!this.queuedActions.isEmpty()) {
