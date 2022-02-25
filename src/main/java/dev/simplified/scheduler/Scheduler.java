@@ -1,7 +1,7 @@
 package dev.sbs.api.scheduler;
 
-import dev.sbs.api.util.concurrent.Concurrent;
-import dev.sbs.api.util.concurrent.ConcurrentList;
+import dev.sbs.api.util.collection.concurrent.Concurrent;
+import dev.sbs.api.util.collection.concurrent.ConcurrentList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
