@@ -4,7 +4,6 @@ import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.data.exception.DataException;
 import dev.sbs.api.mutable.pair.Pair;
 import dev.sbs.api.stream.triple.TriPredicate;
-import dev.sbs.api.util.SimplifiedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -35,9 +34,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, S>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw SimplifiedException.of(DataException.class)
-                .withMessage("Invalid match type '%s'.", match)
-                .build();
+            throw new DataException("Invalid match type '%s'.", match);
 
         return itemsCopy;
     }
@@ -58,9 +55,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, List<S>>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw SimplifiedException.of(DataException.class)
-                .withMessage("Invalid match type '%s'.", match)
-                .build();
+            throw new DataException("Invalid match type '%s'.", match);
 
         return itemsCopy;
     }
