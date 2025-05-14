@@ -10,8 +10,8 @@ public interface SearchFunction<T, R> extends Function<T, R> {
     /**
      * Alows you to traverse down through method references.
      *
-     * @param first  The first function in the chain
-     * @param second The last function in the chain
+     * @param from  The first function in the chain
+     * @param to The last function in the chain
      * @param <T1>   The first class to traverse
      * @param <T2>   The second class to traverse
      * @param <T3>   The return type
