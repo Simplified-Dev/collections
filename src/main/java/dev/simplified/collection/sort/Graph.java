@@ -3,6 +3,7 @@ package dev.sbs.api.collection.sort;
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentList;
 import dev.sbs.api.collection.concurrent.ConcurrentMap;
+import dev.sbs.api.util.builder.ClassBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,7 @@ public class Graph<T> {
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class Builder<T> implements dev.sbs.api.util.builder.Builder<Graph<T>> {
+    public static class Builder<T> implements ClassBuilder<Graph<T>> {
 
         private final T type;
         private final ConcurrentList<T> values = Concurrent.newList();
