@@ -25,12 +25,15 @@ import java.util.stream.StreamSupport;
 public abstract class AtomicCollection<E, T extends Collection<E>> extends AbstractCollection<E> implements Collection<E>, Searchable<E>, Serializable {
 
 	protected final @NotNull T ref;
-	protected final transient ReadWriteLock lock = new ReentrantReadWriteLock();
+	protected final transient @NotNull ReadWriteLock lock = new ReentrantReadWriteLock();
 
 	protected AtomicCollection(@NotNull T ref) {
 		this.ref = ref;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean add(@NotNull E element) {
 		try {
@@ -45,6 +48,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return this.addAll(Arrays.asList(collection));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean addAll(@NotNull Collection<? extends E> collection) {
 		try {
@@ -59,6 +65,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return (predicate.get() && this.add(element));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void clear() {
 		try {
@@ -69,6 +78,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean contains(Object item) {
 		try {
@@ -94,6 +106,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean containsAll(@NotNull Collection<?> collection) {
 		try {
@@ -104,6 +119,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean equals(Object obj) {
 		if (this == obj) return true;
@@ -112,6 +130,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return this.ref.equals(obj);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int hashCode() {
 		try {
@@ -130,6 +151,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return StreamUtil.zipWithIndex(this.spliterator(), parallel);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean isEmpty() {
 		try {
@@ -140,6 +164,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull Iterator<E> iterator() {
 		return new ConcurrentCollectionIterator(this.ref.toArray(), 0);
@@ -153,11 +180,17 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return !this.isEmpty();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final @NotNull Stream<E> parallelStream() {
 		return StreamSupport.stream(this.spliterator(), true);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean remove(Object element) {
 		try {
@@ -170,7 +203,7 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 
 	/**
 	 * Replaces the given element with the provided new element.
-	 * <br><br>
+	 * <p>
 	 * This only adds the replaceWith element if it removes the
 	 * existing element successfully.
 	 *
@@ -184,6 +217,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean removeAll(@NotNull Collection<?> collection) {
 		try {
@@ -194,6 +230,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean retainAll(@NotNull Collection<?> collection) {
 		try {
@@ -204,24 +243,36 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int size() {
 		return this.ref.size();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final @NotNull Stream<E> stream() {
 		return StreamSupport.stream(this.spliterator(), false);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public @NotNull Object[] toArray() {
+	public Object @NotNull [] toArray() {
 		return this.ref.toArray();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	@SuppressWarnings("SuspiciousToArrayCall")
-	public <U> @NotNull U[] toArray(@NotNull U[] array) {
+	public <U> U @NotNull [] toArray(@NotNull U @NotNull [] array) {
 		return this.ref.toArray(array);
 	}
 
@@ -234,6 +285,9 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 			super(snapshot, index);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void remove() {
 			if (this.last < 0)

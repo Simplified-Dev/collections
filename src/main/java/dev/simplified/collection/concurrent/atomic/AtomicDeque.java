@@ -1,6 +1,7 @@
 package dev.sbs.api.collection.concurrent.atomic;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -13,16 +14,25 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		super(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void addFirst(E element) {
 		super.storage.add(0, element);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void addLast(E element) {
 		super.add(element);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean offerFirst(E element) {
 		int before = super.size();
@@ -30,6 +40,9 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		return super.size() > before;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean offerLast(E element) {
 		int before = super.size();
@@ -37,11 +50,17 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		return super.size() > before;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final E removeFirst() {
 		return super.remove();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final E removeLast() {
 		E element = this.pollLast();
@@ -52,13 +71,19 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 			throw new NoSuchElementException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final E pollFirst() {
 		return super.poll();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E pollLast() {
+	public final @Nullable E pollLast() {
 		if (super.isEmpty())
 			return null;
 		else {
@@ -68,8 +93,11 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E getFirst() {
+	public final @NotNull E getFirst() {
 		E element = this.peekFirst();
 
 		if (element != null)
@@ -78,8 +106,11 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 			throw new NoSuchElementException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E getLast() {
+	public final @NotNull E getLast() {
 		E element = this.peekLast();
 
 		if (element != null)
@@ -88,19 +119,28 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 			throw new NoSuchElementException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E peekFirst() {
+	public final @Nullable E peekFirst() {
 		return super.peek();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E peekLast() {
+	public final @Nullable E peekLast() {
 		if (super.isEmpty())
 			return null;
 		else
 			return super.storage.get(super.size() - 1);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean removeFirstOccurrence(Object obj) {
 		Iterator<E> iterator = super.iterator();
@@ -117,6 +157,9 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean removeLastOccurrence(Object obj) {
 		Iterator<E> iterator = this.descendingIterator();
@@ -133,16 +176,25 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void push(E element) {
 		super.offer(element);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E pop() {
+	public final @NotNull E pop() {
 		return this.removeFirst();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull Iterator<E> descendingIterator() {
 		throw new UnsupportedOperationException("This is currently not implemented!");

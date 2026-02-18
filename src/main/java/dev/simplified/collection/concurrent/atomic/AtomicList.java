@@ -14,6 +14,9 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		super(type);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void add(int index, @NotNull E element) {
 		try {
 			super.lock.writeLock().lock();
@@ -23,6 +26,9 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean addAll(int index, @NotNull Collection<? extends E> collection) {
 		try {
@@ -33,6 +39,9 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final E get(int index) {
 		try {
@@ -55,6 +64,9 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		return index < this.size() ? this.get(index) : defaultValue;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int indexOf(Object item) {
 		return this.ref.indexOf(item);
@@ -65,26 +77,41 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		return this;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int lastIndexOf(Object item) {
 		return this.ref.lastIndexOf(item);
 	}
 
-	@Override @NotNull
-	public final ListIterator<E> listIterator() {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final @NotNull ListIterator<E> listIterator() {
 		return this.listIterator(0);
 	}
 
-	@Override @NotNull
-	public ListIterator<E> listIterator(int index) {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public @NotNull ListIterator<E> listIterator(int index) {
 		return new ConcurrentListIterator(this.ref.toArray(), index);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final @NotNull Iterator<E> iterator() {
 		return this.listIterator();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public E remove(int index) {
 		try {
@@ -169,11 +196,17 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 			super(snapshot, index);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public boolean hasPrevious() {
 			return this.cursor > 0;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@SuppressWarnings("unchecked")
 		@Override
 		public E previous() {
@@ -183,16 +216,25 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 				throw new NoSuchElementException();
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public int nextIndex() {
 			return this.cursor;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public int previousIndex() {
 			return this.cursor - 1;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void set(E element) {
 			if (this.last < 0)
@@ -206,6 +248,9 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void add(E element) {
 			this.snapshot = AtomicList.this.toArray();

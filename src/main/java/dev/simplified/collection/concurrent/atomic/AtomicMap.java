@@ -27,22 +27,19 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 	protected final @NotNull M ref;
 	protected final transient ReadWriteLock lock = new ReentrantReadWriteLock();
 
-	/**
-	 * Create a new concurrent map.
-	 */
 	protected AtomicMap(@NotNull M ref, @Nullable Map<? extends K, ? extends V> items) {
 		if (Objects.nonNull(items)) ref.putAll(items);
 		this.ref = ref;
 	}
 
-	/**
-	 * Create a new concurrent map.
-	 */
 	protected AtomicMap(@NotNull M ref, @Nullable Map.Entry<? extends K, ? extends V>... items) {
 		StreamUtil.ofArrays(items).filter(Objects::nonNull).forEach(entry -> ref.put(entry.getKey(), entry.getValue()));
 		this.ref = ref;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void clear() {
 		try {
@@ -53,6 +50,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean containsKey(Object key) {
 		try {
@@ -63,6 +63,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean containsValue(Object value) {
 		try {
@@ -73,11 +76,17 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull Set<Entry<K, V>> entrySet() {
 		return this.ref.entrySet();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean equals(Object obj) {
 		if (this == obj) return true;
@@ -86,6 +95,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return this.ref.equals(obj);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final V get(Object key) {
 		try {
@@ -100,6 +112,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return Optional.ofNullable(this.get(key));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final V getOrDefault(Object key, V defaultValue) {
 		try {
@@ -110,6 +125,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int hashCode() {
 		try {
@@ -120,16 +138,25 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean isEmpty() {
 		return this.size() == 0;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final @NotNull Iterator<Entry<K, V>> iterator() {
 		return new ConcurrentMapIterator(this.entrySet().toArray(), 0);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull Set<K> keySet() {
 		return this.ref.keySet();
@@ -143,8 +170,11 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return this.stream().parallel();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public V put(K key, V value) {
+	public @Nullable V put(K key, V value) {
 		try {
 			this.lock.writeLock().lock();
 			return this.ref.put(key, value);
@@ -157,6 +187,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return this.put(entry.getKey(), entry.getValue());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void putAll(@NotNull Map<? extends K, ? extends V> map) {
 		try {
@@ -167,8 +200,11 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public V putIfAbsent(K key, V value) {
+	public @Nullable V putIfAbsent(K key, V value) {
 		try {
 			this.lock.writeLock().lock();
 			return this.ref.putIfAbsent(key, value);
@@ -177,8 +213,11 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public V remove(Object key) {
+	public @Nullable V remove(Object key) {
 		try {
 			this.lock.readLock().lock();
 			return this.ref.remove(key);
@@ -212,6 +251,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return Optional.ofNullable(this.remove(key)).orElse(defaultValue);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean remove(Object key, Object value) {
 		try {
@@ -222,6 +264,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int size() {
 		return this.ref.size();
@@ -231,6 +276,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 		return PairStream.of(this);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull Collection<V> values() {
 		return this.ref.values();
@@ -242,6 +290,9 @@ public abstract class AtomicMap<K, V, M extends AbstractMap<K, V>> extends Abstr
 			super(snapshot, index);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void remove() {
 			AtomicMap.this.remove(this.snapshot[this.cursor]);

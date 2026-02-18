@@ -24,11 +24,17 @@ public abstract class ConcurrentIterator<E> implements Iterator<E> {
 		this.snapshot = snapshot;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNext() {
 		return this.cursor < this.snapshot.length;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public @NotNull E next() {
 		if (this.hasNext())
@@ -39,6 +45,9 @@ public abstract class ConcurrentIterator<E> implements Iterator<E> {
 
 	public abstract void remove();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void forEachRemaining(Consumer<? super E> action) {
 		Objects.requireNonNull(action);

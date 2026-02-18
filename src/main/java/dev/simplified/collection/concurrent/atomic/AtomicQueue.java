@@ -3,6 +3,7 @@ package dev.sbs.api.collection.concurrent.atomic;
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractQueue;
 import java.util.Collection;
@@ -17,93 +18,147 @@ public abstract class AtomicQueue<E> extends AbstractQueue<E> implements Queue<E
 		this.storage = Concurrent.newLinkedList(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean add(E element) {
 		return super.add(element);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean addAll(@NotNull Collection<? extends E> collection) {
 		return this.storage.addAll(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void clear() {
 		super.clear();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean contains(Object obj) {
 		return this.storage.contains(obj);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean containsAll(@NotNull Collection<?> collection) {
 		return this.storage.containsAll(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final E element() {
 		return super.element();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean isEmpty() {
 		return this.storage.isEmpty();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final @NotNull Iterator<E> iterator() {
 		return this.storage.iterator();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean offer(E element) {
 		return this.storage.add(element);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E peek() {
+	public final @Nullable E peek() {
 		return this.isEmpty() ? null : this.storage.get(0);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E poll() {
+	public final @Nullable E poll() {
 		return this.isEmpty() ? null : this.storage.remove(0);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final E remove() {
+	public final @NotNull E remove() {
 		return super.remove();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean remove(Object obj) {
 		return super.remove(obj);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean removeAll(@NotNull Collection<?> collection) {
 		return this.storage.removeAll(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean retainAll(@NotNull Collection<?> collection) {
 		return this.storage.retainAll(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final int size() {
 		return this.storage.size();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final @NotNull Object[] toArray() {
+	public final Object @NotNull [] toArray() {
 		return this.storage.toArray();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public final @NotNull <T> T[] toArray(@NotNull T[] array) {
+	public final <T> T @NotNull [] toArray(T @NotNull [] array) {
 		return this.storage.toArray(array);
 	}
 
