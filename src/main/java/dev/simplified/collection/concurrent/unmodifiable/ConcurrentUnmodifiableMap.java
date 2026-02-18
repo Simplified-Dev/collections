@@ -61,16 +61,16 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
         throw new UnsupportedOperationException();
     }
 
-    @Override @NotNull
-    public final Set<Map.Entry<K, V>> entrySet() {
+    @Override
+    public final @NotNull Set<Map.Entry<K, V>> entrySet() {
         if (this.unmodifiableEntrySet == null)
             this.unmodifiableEntrySet = new UnmodifiableEntrySet<>(super.entrySet());
 
         return this.unmodifiableEntrySet;
     }
 
-    @Override @NotNull
-    public final Set<K> keySet() {
+    @Override
+    public final @NotNull Set<K> keySet() {
         if (this.unmodifiableKeySet == null)
             this.unmodifiableKeySet = Concurrent.newUnmodifiableSet(super.keySet());
 
@@ -78,7 +78,7 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
     }
 
     @Override
-    public final V put(K key, V value) {
+    public final @Nullable V put(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -88,12 +88,12 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
     }
 
     @Override
-    public final V putIfAbsent(K key, V value) {
+    public final @Nullable V putIfAbsent(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final V remove(Object key) {
+    public final @Nullable V remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
@@ -119,17 +119,15 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
     @AllArgsConstructor
     private static class UnmodifiableEntrySet<K, V> extends ConcurrentUnmodifiableSet<Map.Entry<K, V>> {
 
-        public UnmodifiableEntrySet(Set<Map.Entry<K, V>> entries) {
+        private @NotNull Iterator<Map.Entry<K, V>> iterator;
+
+        public UnmodifiableEntrySet(@Nullable Set<Map.Entry<K, V>> entries) {
             super(entries);
         }
 
-        static <K, V> Consumer<Map.Entry<K, V>> entryConsumer(Consumer<? super Map.Entry<K, V>> action) {
-            return e -> action.accept(new UnmodifiableEntry<>(e));
-        }
-
-        public void forEach(Consumer<? super Map.Entry<K, V>> action) {
+        public void forEach(@NotNull Consumer<? super Map.Entry<K, V>> action) {
             Objects.requireNonNull(action);
-            this.ref.forEach(entryConsumer(action));
+            this.ref.forEach(UnmodifiableEntry.wrap(action));
         }
 
         @Override
@@ -137,70 +135,23 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
             return new UnmodifiableSpliterator<>(this.ref.spliterator());
         }
 
-        @AllArgsConstructor
-        static class UnmodifiableSpliterator<K, V> implements Spliterator<Map.Entry<K,V>> {
-
-            private final Spliterator<Map.Entry<K, V>> spliterator;
-
-            @Override
-            public boolean tryAdvance(Consumer<? super Map.Entry<K, V>> action) {
-                Objects.requireNonNull(action);
-                return this.spliterator.tryAdvance(entryConsumer(action));
-            }
-
-            @Override
-            public void forEachRemaining(Consumer<? super Map.Entry<K, V>> action) {
-                Objects.requireNonNull(action);
-                this.spliterator.forEachRemaining(entryConsumer(action));
-            }
-
-            @Override
-            public Spliterator<Map.Entry<K, V>> trySplit() {
-                Spliterator<Map.Entry<K, V>> split = this.spliterator.trySplit();
-                return split == null ? null : new UnmodifiableSpliterator<>(split);
-            }
-
-            @Override
-            public long estimateSize() {
-                return this.spliterator.estimateSize();
-            }
-
-            @Override
-            public long getExactSizeIfKnown() {
-                return this.spliterator.getExactSizeIfKnown();
-            }
-
-            @Override
-            public int characteristics() {
-                return this.spliterator.characteristics();
-            }
-
-            @Override
-            public boolean hasCharacteristics(int characteristics) {
-                return this.spliterator.hasCharacteristics(characteristics);
-            }
-
-            @Override
-            public Comparator<? super Map.Entry<K, V>> getComparator() {
-                return this.spliterator.getComparator();
-            }
-
-        }
-
-        @Override @NotNull
-        public Iterator<Map.Entry<K,V>> iterator() {
+        @Override
+        public @NotNull Iterator<Map.Entry<K, V>> iterator() {
             return new Iterator<>() {
 
                 private final Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator = UnmodifiableEntrySet.this.ref.iterator();
 
+                @Override
                 public boolean hasNext() {
                     return this.iterator.hasNext();
                 }
 
+                @Override
                 public Map.Entry<K, V> next() {
                     return new UnmodifiableEntry<>(this.iterator.next());
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
@@ -221,14 +172,14 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
 
         @Override
         @SuppressWarnings("all")
-        public <T> @NotNull T[] toArray(T[] array) {
-            // We don't pass a to ref.toArray, to avoid window of
+        public <T> T @NotNull [] toArray(T @NotNull [] array) {
+            // We don't pass ref.toArray, to avoid window of
             // vulnerability wherein an unscrupulous multithreaded client
-            // could get his hands on raw (unwrapped) Entries from ref.
+            // could get his hands on raw (unwrapped) Entries from ref
             Object[] arr = this.ref.toArray(array.length == 0 ? array : Arrays.copyOf(array, 0));
 
             for (int i = 0; i < arr.length; i++)
-                arr[i] = new UnmodifiableEntry<>((Map.Entry<? extends K, ? extends V>)arr[i]);
+                arr[i] = new UnmodifiableEntry<>((Map.Entry<? extends K, ? extends V>) arr[i]);
 
             if (arr.length > array.length)
                 return (T[]) arr;
@@ -254,15 +205,16 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
 
         /**
          * The next two methods are overridden to protect against
-         * an unscrupulous List whose contains(Object o) method senses
+         * an unscrupulous List which contains(Object o) method senses
          * when o is a Map.Entry, and calls o.setValue.
          */
         @Override
-        public boolean containsAll(Collection<?> coll) {
+        public boolean containsAll(@NotNull Collection<?> coll) {
             for (Object e : coll) {
                 if (!this.contains(e)) // Invokes safe contains() above
                     return false;
             }
+
             return true;
         }
 
@@ -290,14 +242,17 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
             return this.entry.getValue();
         }
 
+        @Override
         public V setValue(V value) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public int hashCode() {
             return this.entry.hashCode();
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof Map.Entry<?, ?> t)) return false;
@@ -306,8 +261,63 @@ public class ConcurrentUnmodifiableMap<K, V> extends ConcurrentMap<K, V> {
                     (this.entry.getValue() == null ? t.getValue() == null : this.entry.getValue().equals(t.getValue()));
         }
 
+        @Override
         public String toString() {
             return this.entry.toString();
+        }
+
+        private static <K, V> @NotNull Consumer<Map.Entry<K, V>> wrap(@NotNull Consumer<? super Map.Entry<K, V>> action) {
+            return entry -> action.accept(new UnmodifiableEntry<>(entry));
+        }
+
+    }
+
+    @AllArgsConstructor
+    private static class UnmodifiableSpliterator<K, V> implements Spliterator<Map.Entry<K,V>> {
+
+        private final @NotNull Spliterator<Map.Entry<K, V>> spliterator;
+
+        @Override
+        public boolean tryAdvance(@NotNull Consumer<? super Map.Entry<K, V>> action) {
+            Objects.requireNonNull(action);
+            return this.spliterator.tryAdvance(UnmodifiableEntry.wrap(action));
+        }
+
+        @Override
+        public void forEachRemaining(@NotNull Consumer<? super Map.Entry<K, V>> action) {
+            Objects.requireNonNull(action);
+            this.spliterator.forEachRemaining(UnmodifiableEntry.wrap(action));
+        }
+
+        @Override
+        public @Nullable Spliterator<Map.Entry<K, V>> trySplit() {
+            Spliterator<Map.Entry<K, V>> split = this.spliterator.trySplit();
+            return split == null ? null : new UnmodifiableSpliterator<>(split);
+        }
+
+        @Override
+        public long estimateSize() {
+            return this.spliterator.estimateSize();
+        }
+
+        @Override
+        public long getExactSizeIfKnown() {
+            return this.spliterator.getExactSizeIfKnown();
+        }
+
+        @Override
+        public int characteristics() {
+            return this.spliterator.characteristics();
+        }
+
+        @Override
+        public boolean hasCharacteristics(int characteristics) {
+            return this.spliterator.hasCharacteristics(characteristics);
+        }
+
+        @Override
+        public @NotNull Comparator<? super Map.Entry<K, V>> getComparator() {
+            return this.spliterator.getComparator();
         }
 
     }
