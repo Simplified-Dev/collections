@@ -3,7 +3,7 @@ package dev.sbs.api.tuple.pair;
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentMap;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedMap;
-import dev.sbs.api.tuple.triple.TriFunction;
+import dev.sbs.api.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;

@@ -2,7 +2,7 @@ package dev.sbs.api.util;
 
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentSet;
-import dev.sbs.api.tuple.triple.TriFunction;
+import dev.sbs.api.function.TriFunction;
 import dev.sbs.api.tuple.triple.Triple;
 import dev.sbs.api.tuple.triple.TripleStream;
 import lombok.AccessLevel;

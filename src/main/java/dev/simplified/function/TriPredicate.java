@@ -1,4 +1,4 @@
-package dev.sbs.api.tuple.triple;
+package dev.sbs.api.function;
 
 import java.util.Objects;
 import java.util.function.Predicate;

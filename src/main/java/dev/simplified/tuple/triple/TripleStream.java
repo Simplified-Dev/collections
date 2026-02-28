@@ -2,6 +2,9 @@ package dev.sbs.api.tuple.triple;
 
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentList;
+import dev.sbs.api.function.TriConsumer;
+import dev.sbs.api.function.TriFunction;
+import dev.sbs.api.function.TriPredicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
