@@ -1,4 +1,4 @@
-package dev.sbs.api.collection.sort;
+package dev.sbs.api.collection.query;
 
 import dev.sbs.api.util.StringUtil;
 import lombok.Getter;

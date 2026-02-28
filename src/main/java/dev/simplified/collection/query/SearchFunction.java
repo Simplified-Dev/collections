@@ -1,4 +1,4 @@
-package dev.sbs.api.collection.search;
+package dev.sbs.api.collection.query;
 
 import org.jetbrains.annotations.NotNull;
 

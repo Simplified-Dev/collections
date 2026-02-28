@@ -1,8 +1,8 @@
-package dev.sbs.api.collection.search;
+package dev.sbs.api.collection.query;
 
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.persistence.exception.SessionException;
-import dev.sbs.api.stream.pair.Pair;
+import dev.sbs.api.tuple.pair.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
