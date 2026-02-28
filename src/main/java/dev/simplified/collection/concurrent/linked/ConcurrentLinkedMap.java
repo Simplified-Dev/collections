@@ -1,6 +1,5 @@
 package dev.sbs.api.collection.concurrent.linked;
 
-import dev.sbs.api.collection.MaxSizeLinkedMap;
 import dev.sbs.api.collection.concurrent.atomic.AtomicMap;
 import org.jetbrains.annotations.Nullable;
 

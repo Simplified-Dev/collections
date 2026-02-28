@@ -1,7 +1,7 @@
 package dev.sbs.api.collection.concurrent;
 
 import dev.sbs.api.collection.concurrent.atomic.AtomicList;
-import dev.sbs.api.collection.sort.SortOrder;
+import dev.sbs.api.collection.query.SortOrder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -8,7 +8,6 @@ import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableLink
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableList;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableMap;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableSet;
-import dev.sbs.api.stream.StreamUtil;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
@@ -208,99 +207,99 @@ public final class Concurrent {
 	}
 
 	public static <E> @NotNull Collector<E, ?, ConcurrentCollection<E>> toCollection() {
-		return StreamUtil.toConcurrentCollection();
+		return ConcurrentCollector.toConcurrentCollection();
 	}
 
 	public static <E> @NotNull Collector<E, ?, ConcurrentLinkedList<E>> toLinkedList() {
-		return StreamUtil.toConcurrentLinkedList();
+		return ConcurrentCollector.toConcurrentLinkedList();
 	}
 
 	public static <E> @NotNull Collector<E, ?, ConcurrentList<E>> toList() {
-		return StreamUtil.toConcurrentList();
+		return ConcurrentCollector.toConcurrentList();
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentMap<K, V>> toMap() {
-		return StreamUtil.toConcurrentMap();
+		return ConcurrentCollector.toConcurrentMap();
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentMap<K, V>> toMap(BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentMap(mergeFunction);
+		return ConcurrentCollector.toConcurrentMap(mergeFunction);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentMap<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-		return StreamUtil.toConcurrentMap(keyMapper, valueMapper);
+		return ConcurrentCollector.toConcurrentMap(keyMapper, valueMapper);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentMap<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentMap(keyMapper, valueMapper, mergeFunction);
+		return ConcurrentCollector.toConcurrentMap(keyMapper, valueMapper, mergeFunction);
 	}
 
 	public static <K, V, T, R extends ConcurrentMap<K, V>> @NotNull Collector<T, ?, R> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction, Supplier<R> mapSupplier) {
-		return StreamUtil.toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
+		return ConcurrentCollector.toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentLinkedMap<K, V>> toLinkedMap() {
-		return StreamUtil.toConcurrentLinkedMap();
+		return ConcurrentCollector.toConcurrentLinkedMap();
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentLinkedMap<K, V>> toLinkedMap(BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentLinkedMap(mergeFunction);
+		return ConcurrentCollector.toConcurrentLinkedMap(mergeFunction);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentLinkedMap<K, V>> toLinkedMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-		return StreamUtil.toConcurrentLinkedMap(keyMapper, valueMapper);
+		return ConcurrentCollector.toConcurrentLinkedMap(keyMapper, valueMapper);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentLinkedMap<K, V>> toLinkedMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentLinkedMap(keyMapper, valueMapper, mergeFunction);
+		return ConcurrentCollector.toConcurrentLinkedMap(keyMapper, valueMapper, mergeFunction);
 	}
 
 	public static <K, V, T, R extends ConcurrentLinkedMap<K, V>> @NotNull Collector<T, ?, R> toLinkedMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction, Supplier<R> mapSupplier) {
-		return StreamUtil.toConcurrentLinkedMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
+		return ConcurrentCollector.toConcurrentLinkedMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
 	}
 
 	public static <E, A extends ConcurrentList<E>> @NotNull Collector<E, ?, A> toUnmodifiableList() {
-		return StreamUtil.toConcurrentUnmodifiableList();
+		return ConcurrentCollector.toConcurrentUnmodifiableList();
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toUnmodifiableMap() {
-		return StreamUtil.toConcurrentUnmodifiableMap();
+		return ConcurrentCollector.toConcurrentUnmodifiableMap();
 	}
 
 	public static <K, V, T extends Map.Entry<K, V>> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toUnmodifiableMap(BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentUnmodifiableMap(mergeFunction);
+		return ConcurrentCollector.toConcurrentUnmodifiableMap(mergeFunction);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toUnmodifiableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-		return StreamUtil.toConcurrentUnmodifiableMap(keyMapper, valueMapper);
+		return ConcurrentCollector.toConcurrentUnmodifiableMap(keyMapper, valueMapper);
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toUnmodifiableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
-		return StreamUtil.toConcurrentUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
+		return ConcurrentCollector.toConcurrentUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
 	}
 
 	public static <K, V, T, R extends ConcurrentMap<K, V>> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toUnmodifiableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction, Supplier<R> mapSupplier) {
-		return StreamUtil.toConcurrentUnmodifiableMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
+		return ConcurrentCollector.toConcurrentUnmodifiableMap(keyMapper, valueMapper, mergeFunction, mapSupplier);
 	}
 
 	public static <E, A extends ConcurrentSet<E>> @NotNull Collector<E, ?, A> toUnmodifiableSet() {
-		return StreamUtil.toConcurrentUnmodifiableSet();
+		return ConcurrentCollector.toConcurrentUnmodifiableSet();
 	}
 
 	public static <E> @NotNull Collector<E, ?, ConcurrentSet<E>> toSet() {
-		return StreamUtil.toConcurrentSet();
+		return ConcurrentCollector.toConcurrentSet();
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentMap<K, V>> toWeakMap() {
-		return StreamUtil.toWeakConcurrentMap();
+		return ConcurrentCollector.toWeakConcurrentMap();
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentLinkedMap<K, V>> toWeakLinkedMap() {
-		return StreamUtil.toWeakConcurrentLinkedMap();
+		return ConcurrentCollector.toWeakConcurrentLinkedMap();
 	}
 
 	public static <K, V, T> @NotNull Collector<T, ?, ConcurrentUnmodifiableMap<K, V>> toWeakUnmodifiableMap() {
-		return StreamUtil.toWeakConcurrentUnmodifiableMap();
+		return ConcurrentCollector.toWeakConcurrentUnmodifiableMap();
 	}
 
 }
