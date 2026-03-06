@@ -73,7 +73,12 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 	}
 
 	public final E getOrDefault(int index, E defaultValue) {
-		return index < this.size() ? this.get(index) : defaultValue;
+		try {
+			this.lock.readLock().lock();
+			return index < this.ref.size() ? this.ref.get(index) : defaultValue;
+		} finally {
+			this.lock.readLock().unlock();
+		}
 	}
 
 	/**
