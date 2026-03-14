@@ -1,6 +1,10 @@
 package dev.sbs.api.collection.concurrent.linked;
 
+import dev.sbs.api.collection.concurrent.Concurrent;
+import dev.sbs.api.collection.concurrent.ConcurrentList;
+import dev.sbs.api.collection.concurrent.ConcurrentSet;
 import dev.sbs.api.collection.concurrent.atomic.AtomicMap;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -53,6 +57,21 @@ public class ConcurrentLinkedMap<K, V> extends AtomicMap<K, V, MaxSizeLinkedMap<
 	 */
 	public ConcurrentLinkedMap(@Nullable Map<? extends K, ? extends V> map, int maxSize) {
 		super(new MaxSizeLinkedMap<>(maxSize), map);
+	}
+
+	@Override
+	protected final @NotNull ConcurrentSet<Entry<K, V>> createEmptyEntrySet() {
+		return Concurrent.newSet();
+	}
+
+	@Override
+	protected final @NotNull ConcurrentSet<K> createEmptyKeySet() {
+		return Concurrent.newSet();
+	}
+
+	@Override
+	protected final @NotNull ConcurrentList<V> createEmptyValueList() {
+		return Concurrent.newList();
 	}
 
 }
