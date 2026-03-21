@@ -13,59 +13,54 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Represents a scheduled task that is executed by a {@link Scheduler}.
+ * A handle for a task submitted to a {@link Scheduler}, wrapping a {@link ScheduledFuture}
+ * and exposing lifecycle state (running, repeating, done, cancelled).
  * <p>
- * The task can be configured with an initial delay and a repeating period.
- * It provides mechanisms for canceling, tracking its state (e.g., running, done, or canceled),
- * and handling execution errors.
+ * Each task is assigned a monotonically increasing {@linkplain #getId() id} at creation time.
+ * A task may be <em>one-shot</em> (executes once after an initial delay) or <em>repeating</em>
+ * (re-executes with a fixed delay between the end of one execution and the start of the next).
+ * Repeating tasks use {@link ScheduledExecutorService#scheduleWithFixedDelay} so that long-running
+ * executions do not cause catch-up bursts.
  * <p>
- * This class is immutable except for its internal state, such as
- * {@code running}, {@code repeating}, and {@code consecutiveErrors}, which are updated
- * during the lifecycle of the task.
+ * Execution errors are caught, logged, and tracked via {@link #getConsecutiveErrors()}; the
+ * counter resets to zero after every successful execution.
+ *
+ * @see Scheduler
  */
 @Getter
 @Log4j2
 public final class ScheduledTask implements Runnable {
 
-    private static AtomicLong currentId = new AtomicLong(1);
+    /** Global counter used to assign a unique id to every {@code ScheduledTask}. */
+    private static final AtomicLong currentId = new AtomicLong(1);
 
-    /**
-     * The time the task was created.
-     */
+    /** Epoch millisecond timestamp recorded when this task was created. */
     private final long addedTime = System.currentTimeMillis();
 
-    /**
-     * The id of the task.
-     */
+    /** Unique identifier for this task, assigned from {@link #currentId}. */
     private final long id;
 
-    /**
-     * The time (in milliseconds) before the task will run.
-     */
+    /** The delay before the first execution, expressed in {@link #timeUnit}. */
     private final long initialDelay;
 
     /**
-     * The time (in milliseconds) before the task will repeat.
+     * The delay between the end of one execution and the start of the next,
+     * expressed in {@link #timeUnit}. A value of {@code 0} indicates a one-shot task.
      */
     private final long period;
 
-    /**
-     * The TimeUnit used for {@link #getInitialDelay()} and {@link #getPeriod()}.
-     */
+    /** The time unit for both {@link #initialDelay} and {@link #period}. */
     private final @NotNull TimeUnit timeUnit;
 
-    /**
-     * Is this task currently running?
-     */
+    /** {@code true} while the task's {@link Runnable} is actively executing. */
     private volatile boolean running;
 
-    /**
-     * Will this task run repeatedly?
-     */
+    /** {@code true} if this task was scheduled with a positive {@link #period}. */
     private volatile boolean repeating;
 
     /**
-     * The number of consecutive errors.
+     * Rolling count of consecutive execution failures. Reset to zero after each
+     * successful execution; incremented on each caught exception.
      */
     private AtomicInteger consecutiveErrors = new AtomicInteger(0);
 
@@ -76,11 +71,17 @@ public final class ScheduledTask implements Runnable {
     private final @NotNull ScheduledFuture<?> scheduledFuture;
 
     /**
-     * Creates a new Scheduled Task.
+     * Creates and immediately schedules a new task on the given executor.
+     * <p>
+     * If {@code period} is greater than zero the task repeats using
+     * {@link ScheduledExecutorService#scheduleWithFixedDelay}; otherwise it is
+     * scheduled as a one-shot via {@link ScheduledExecutorService#schedule}.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initialDelay (in ticks) to wait before the task is run.
-     * @param period  The initialDelay (in ticks) to wait before calling the task again.
+     * @param executorService the executor that will run this task
+     * @param task            the work to execute
+     * @param initialDelay    the delay before the first execution
+     * @param period          the delay between end-of-execution and the next start ({@code 0} for one-shot)
+     * @param timeUnit        the time unit for {@code initialDelay} and {@code period}
      */
     ScheduledTask(
         @NotNull ScheduledExecutorService executorService,
@@ -98,49 +99,64 @@ public final class ScheduledTask implements Runnable {
 
         // Schedule Task
         if (this.isRepeating())
-            this.scheduledFuture = executorService.scheduleAtFixedRate(this, initialDelay, period, timeUnit);
+            this.scheduledFuture = executorService.scheduleWithFixedDelay(this, initialDelay, period, timeUnit);
         else
             this.scheduledFuture = executorService.schedule(this, initialDelay, timeUnit);
     }
 
     /**
-     * Will attempt to cancel this task.
+     * Attempts to cancel this task without interrupting a running execution.
+     * <p>
+     * Equivalent to {@code cancel(false)}.
+     *
+     * @see #cancel(boolean)
      */
     public void cancel() {
         this.cancel(false);
     }
 
     /**
-     * Will attempt to cancel this task, even if running.
+     * Attempts to cancel this task, optionally interrupting a running execution.
+     * <p>
+     * If the underlying {@link ScheduledFuture#cancel(boolean)} call succeeds, the
+     * {@link #repeating} and {@link #running} flags are cleared. If cancellation fails
+     * (e.g. the task already completed), the flags are left unchanged.
+     *
+     * @param mayInterruptIfRunning {@code true} to interrupt the executing thread;
+     *                              {@code false} to allow in-progress execution to finish
      */
     public void cancel(boolean mayInterruptIfRunning) {
-        // Attempt Cancellation
-        this.scheduledFuture.cancel(mayInterruptIfRunning);
-
-        if (this.scheduledFuture.isDone()) {
+        if (this.scheduledFuture.cancel(mayInterruptIfRunning)) {
             this.repeating = false;
             this.running = false;
         }
     }
 
     /**
-     * Gets if the current task is done.
+     * Returns whether this task has completed, either normally, via cancellation, or
+     * due to an exception (for one-shot tasks).
      *
-     * @return True if the task has completed normally, encountered an exception or cancelled.
+     * @return {@code true} if the underlying future is done
      */
     public boolean isDone() {
         return this.scheduledFuture.isDone();
     }
 
     /**
-     * Gets if the current task is canceled.
+     * Returns whether this task was cancelled before it completed normally.
      *
-     * @return True if the task is canceled.
+     * @return {@code true} if the underlying future was cancelled
+     * @see #cancel(boolean)
      */
     public boolean isCanceled() {
         return this.scheduledFuture.isCancelled();
     }
 
+    /**
+     * Executes the wrapped {@link Runnable}, tracking the {@link #running} state and
+     * logging any exceptions. On success the {@link #consecutiveErrors} counter is
+     * reset to zero; on failure it is incremented.
+     */
     @Override
     public void run() {
         try {

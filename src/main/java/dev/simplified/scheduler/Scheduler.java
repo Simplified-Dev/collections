@@ -10,22 +10,62 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A dual-executor task scheduler that supports both serial (synchronous) and parallel
+ * (asynchronous) execution of one-shot and repeating {@link ScheduledTask}s.
+ * <p>
+ * Internally the scheduler maintains two {@link ScheduledExecutorService} instances:
+ * <ul>
+ *   <li><b>syncExecutor</b> — a single-threaded executor for serial tasks; only one
+ *       synchronous task runs at a time, making it safe for lightweight, ordering-sensitive work.</li>
+ *   <li><b>asyncExecutor</b> — a thread-pool executor (sized to available processors by default)
+ *       for concurrent tasks.</li>
+ * </ul>
+ * A background cleaner task runs on the sync executor every 30 seconds to purge completed
+ * tasks from the internal task list. The cleaner is cancelled automatically on {@link #shutdown()}.
+ * <p>
+ * The {@link Executor} contract is implemented by delegating {@link #execute(Runnable)} to
+ * the async executor, so this scheduler can be passed anywhere an {@code Executor} is expected.
+ *
+ * @see ScheduledTask
+ */
 public final class Scheduler implements Executor {
 
+    /** Single-threaded executor for synchronous (serial) task scheduling. */
     private final @NotNull ScheduledExecutorService syncExecutor;
+
+    /** Multi-threaded executor for asynchronous (parallel) task scheduling. */
     private final @NotNull ScheduledExecutorService asyncExecutor;
+
+    /** All user-submitted tasks tracked by this scheduler. */
     private final @NotNull ConcurrentList<ScheduledTask> tasks = Concurrent.newList();
 
+    /** Internal cleaner task that periodically removes completed tasks from {@link #tasks}. */
+    private final @NotNull ScheduledTask cleanerTask;
+
+    /**
+     * Creates a new scheduler with thread pool size equal to the number of available processors.
+     *
+     * @see #Scheduler(int)
+     */
     public Scheduler() {
         this(Runtime.getRuntime().availableProcessors());
     }
 
+    /**
+     * Creates a new scheduler with the specified async thread pool size.
+     * <p>
+     * A background cleaner task is immediately scheduled on the sync executor to remove
+     * completed tasks from the internal list every 30 seconds (after a 1-second initial delay).
+     *
+     * @param corePoolSize the number of threads in the async executor pool
+     */
     public Scheduler(int corePoolSize) {
         this.syncExecutor = Executors.newSingleThreadScheduledExecutor();
         this.asyncExecutor = Executors.newScheduledThreadPool(corePoolSize);
 
         // Schedule Permanent Cleaner
-        new ScheduledTask(
+        this.cleanerTask = new ScheduledTask(
             this.syncExecutor,
             () -> this.tasks.removeIf(ScheduledTask::isDone),
             1_000,
@@ -35,10 +75,12 @@ public final class Scheduler implements Executor {
     }
 
     /**
-     * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not lose ownership of any monitors.
+     * Causes the calling thread to sleep for the specified number of milliseconds.
+     * <p>
+     * If the thread is interrupted during sleep, the interruption is silently swallowed.
      *
-     * @param millis the length of time to sleep in milliseconds
-     * @throws IllegalArgumentException if the value of millis is negative
+     * @param millis the duration to sleep in milliseconds
+     * @throws IllegalArgumentException if {@code millis} is negative
      */
     public static void sleep(@Range(from = 0, to = Long.MAX_VALUE) long millis) {
         try {
@@ -46,10 +88,26 @@ public final class Scheduler implements Executor {
         } catch (InterruptedException ignore) { }
     }
 
+    /**
+     * Cancels the task with the given id without interrupting a running execution.
+     * <p>
+     * Equivalent to {@code cancel(id, false)}.
+     *
+     * @param id the {@linkplain ScheduledTask#getId() task id} to cancel
+     * @see #cancel(long, boolean)
+     */
     public void cancel(@Range(from = 1, to = Long.MAX_VALUE) long id) {
         this.cancel(id, false);
     }
 
+    /**
+     * Cancels the task with the given id, optionally interrupting a running execution.
+     * <p>
+     * If no task with the specified id exists in the task list, this method is a no-op.
+     *
+     * @param id                    the {@linkplain ScheduledTask#getId() task id} to cancel
+     * @param mayInterruptIfRunning {@code true} to interrupt the executing thread
+     */
     public void cancel(@Range(from = 1, to = Long.MAX_VALUE) long id, boolean mayInterruptIfRunning) {
         this.tasks.stream()
             .filter(scheduledTask -> scheduledTask.getId() == id)
@@ -57,127 +115,159 @@ public final class Scheduler implements Executor {
             .ifPresent(scheduledTask -> scheduledTask.cancel(mayInterruptIfRunning));
     }
 
+    /**
+     * Cancels the given task without interrupting a running execution.
+     * <p>
+     * Equivalent to {@code cancel(task, false)}.
+     *
+     * @param task the task to cancel
+     * @see #cancel(ScheduledTask, boolean)
+     */
     public void cancel(@NotNull ScheduledTask task) {
         this.cancel(task, false);
     }
 
+    /**
+     * Cancels the given task, optionally interrupting a running execution.
+     *
+     * @param task                  the task to cancel
+     * @param mayInterruptIfRunning {@code true} to interrupt the executing thread
+     * @see ScheduledTask#cancel(boolean)
+     */
     public void cancel(@NotNull ScheduledTask task, boolean mayInterruptIfRunning) {
         task.cancel(mayInterruptIfRunning);
     }
 
+    /**
+     * Returns an unmodifiable snapshot of all tracked tasks.
+     *
+     * @return an unmodifiable {@link ConcurrentList} of currently tracked tasks
+     */
     public @NotNull ConcurrentList<ScheduledTask> getTasks() {
         return Concurrent.newUnmodifiableList(this.tasks);
     }
 
     /**
-     * Repeats a task (synchronously) every 50 milliseconds.
+     * Schedules a repeating synchronous task with no initial delay and a 50-millisecond period.
      * <p>
-     * Warning: This method is run on the main thread, don't do anything heavy.
+     * <b>Warning:</b> synchronous tasks share a single thread — avoid heavy or blocking work.
      *
-     * @param task The task to run.
-     * @return The scheduled task.
+     * @param task the work to execute
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask repeat(@NotNull Runnable task) {
         return this.schedule(task, 0, 50);
     }
 
     /**
-     * Repeats a task (asynchronously) every 50 milliseconds.
+     * Schedules a repeating asynchronous task with no initial delay and a 50-millisecond period.
      *
-     * @param task The task to run.
-     * @return The scheduled task.
+     * @param task the work to execute
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask repeatAsync(@NotNull Runnable task) {
         return this.scheduleAsync(task, 0, 50);
     }
 
     /**
-     * Runs a task (synchronously).
+     * Schedules a one-shot synchronous task for immediate execution.
      *
-     * @param task The task to run.
-     * @return The scheduled task.
+     * @param task the work to execute
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task) {
         return this.schedule(task, 0);
     }
 
     /**
-     * Runs a task (synchronously).
+     * Schedules a one-shot synchronous task with the specified delay in milliseconds.
      *
-     * @param task  The task to run.
-     * @param delay The delay (in milliseconds) to wait before the task runs.
-     * @return The scheduled task.
+     * @param task  the work to execute
+     * @param delay the delay in milliseconds before execution
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long delay) {
         return this.schedule(task, delay, 0);
     }
 
     /**
-     * Runs a task (synchronously).
+     * Schedules a synchronous task with the specified delays in milliseconds.
+     * <p>
+     * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
+     * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initial delay (in milliseconds) to wait before the task runs.
-     * @param repeatDelay  The repeat delay (in milliseconds) to wait before running the task again.
-     * @return The scheduled task.
+     * @param task         the work to execute
+     * @param initialDelay the delay in milliseconds before the first execution
+     * @param repeatDelay  the delay in milliseconds between executions ({@code 0} for one-shot)
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay) {
         return this.schedule(task, initialDelay, repeatDelay, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Runs a task (synchronously).
+     * Schedules a synchronous task with the specified delays and time unit.
+     * <p>
+     * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
+     * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initial delay to wait before the task runs.
-     * @param repeatDelay  The repeat delay to wait before running the task again.
-     * @param timeUnit     The unit of time for initialDelay and repeatDelay.
-     * @return The scheduled task.
+     * @param task         the work to execute
+     * @param initialDelay the delay before the first execution
+     * @param repeatDelay  the delay between executions ({@code 0} for one-shot)
+     * @param timeUnit     the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {
         return this.scheduleTask(task, initialDelay, repeatDelay, false, timeUnit);
     }
 
     /**
-     * Runs a task (asynchronously).
+     * Schedules a one-shot asynchronous task for immediate execution.
      *
-     * @param task The task to run.
-     * @return The scheduled task.
+     * @param task the work to execute
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task) {
         return this.scheduleAsync(task, 0);
     }
 
     /**
-     * Runs a task (asynchronously).
+     * Schedules a one-shot asynchronous task with the specified delay in milliseconds.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initial delay (in milliseconds) to wait before the task runs.
-     * @return The scheduled task.
+     * @param task         the work to execute
+     * @param initialDelay the delay in milliseconds before execution
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay) {
         return this.scheduleAsync(task, initialDelay, 0);
     }
 
     /**
-     * Runs a task (asynchronously).
+     * Schedules an asynchronous task with the specified delays in milliseconds.
+     * <p>
+     * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
+     * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initial delay (in milliseconds) to wait before the task runs.
-     * @param repeatDelay  The repeat delay (in milliseconds) to wait before running the task again.
-     * @return The scheduled task.
+     * @param task         the work to execute
+     * @param initialDelay the delay in milliseconds before the first execution
+     * @param repeatDelay  the delay in milliseconds between executions ({@code 0} for one-shot)
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay) {
         return this.scheduleAsync(task, initialDelay, repeatDelay, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Runs a task (asynchronously).
+     * Schedules an asynchronous task with the specified delays and time unit.
+     * <p>
+     * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
+     * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         The task to run.
-     * @param initialDelay The initial delay to wait before the task runs.
-     * @param repeatDelay  The repeat delay to wait before running the task again.
-     * @param timeUnit     The unit of time for initialDelay and repeatDelay.
-     * @return The scheduled task.
+     * @param task         the work to execute
+     * @param initialDelay the delay before the first execution
+     * @param repeatDelay  the delay between executions ({@code 0} for one-shot)
+     * @param timeUnit     the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {
         return this.scheduleTask(task, initialDelay, repeatDelay, true, timeUnit);
@@ -196,19 +286,52 @@ public final class Scheduler implements Executor {
         return scheduledTask;
     }
 
+    /**
+     * Initiates an orderly shutdown of this scheduler.
+     * <p>
+     * The internal cleaner task is cancelled first, then both the sync and async executors
+     * are shut down. Previously submitted tasks will still run to completion, but no new
+     * tasks will be accepted.
+     *
+     * @see #isShutdown()
+     * @see #isTerminated()
+     */
     public void shutdown() {
+        this.cleanerTask.cancel();
         this.syncExecutor.shutdown();
         this.asyncExecutor.shutdown();
     }
 
+    /**
+     * Returns whether both executors have been shut down.
+     *
+     * @return {@code true} if both the sync and async executors have been shut down
+     * @see #shutdown()
+     */
     public boolean isShutdown() {
         return this.syncExecutor.isShutdown() && this.asyncExecutor.isShutdown();
     }
 
+    /**
+     * Returns whether both executors have terminated after shutdown.
+     * <p>
+     * A terminated executor has completed all submitted tasks and released its threads.
+     *
+     * @return {@code true} if both the sync and async executors have terminated
+     * @see #shutdown()
+     */
     public boolean isTerminated() {
         return this.syncExecutor.isTerminated() && this.asyncExecutor.isTerminated();
     }
 
+    /**
+     * Submits a command for asynchronous execution on the async executor.
+     * <p>
+     * This method satisfies the {@link Executor} contract, allowing this scheduler to be
+     * used wherever an {@code Executor} is expected.
+     *
+     * @param command the runnable task to execute
+     */
     @Override
     public void execute(@NotNull Runnable command) {
         this.asyncExecutor.execute(command);
