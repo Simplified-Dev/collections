@@ -1,9 +1,9 @@
 package dev.sbs.api.tuple.pair;
 
-import dev.sbs.api.builder.CompareToBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Map;
 
 /**
@@ -120,10 +120,11 @@ public interface Pair<L, R> extends Map.Entry<L, R>, Comparable<Pair<L, R>> {
      */
     @Override
     default int compareTo(@NotNull Pair<L, R> other) {
-        return new CompareToBuilder()
-            .append(getLeft(), other.getLeft())
-            .append(getRight(), other.getRight())
-            .toComparison();
+        @SuppressWarnings("unchecked")
+        Comparator<Object> nullSafeComparator = (Comparator<Object>) (Comparator<?>) Comparator.nullsFirst(Comparator.naturalOrder());
+        int result = nullSafeComparator.compare(getLeft(), other.getLeft());
+        if (result != 0) return result;
+        return nullSafeComparator.compare(getRight(), other.getRight());
     }
 
     /**

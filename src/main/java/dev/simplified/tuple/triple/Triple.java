@@ -1,8 +1,9 @@
 package dev.sbs.api.tuple.triple;
 
-import dev.sbs.api.builder.CompareToBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Comparator;
 
 /**
  * A triple consisting of three elements.
@@ -67,11 +68,13 @@ public interface Triple<L, M, R> extends Comparable<Triple<L, M, R>> {
      */
     @Override
     default int compareTo(@NotNull Triple<L, M, R> other) {
-        return new CompareToBuilder()
-            .append(getLeft(), other.getLeft())
-            .append(getMiddle(), other.getMiddle())
-            .append(getRight(), other.getRight())
-            .toComparison();
+        @SuppressWarnings("unchecked")
+        Comparator<Object> nullSafeComparator = (Comparator<Object>) (Comparator<?>) Comparator.nullsFirst(Comparator.naturalOrder());
+        int result = nullSafeComparator.compare(getLeft(), other.getLeft());
+        if (result != 0) return result;
+        result = nullSafeComparator.compare(getMiddle(), other.getMiddle());
+        if (result != 0) return result;
+        return nullSafeComparator.compare(getRight(), other.getRight());
     }
 
     /**
