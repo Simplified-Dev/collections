@@ -41,7 +41,7 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 	public void addFirst(@NotNull E element) {
 		try {
 			super.lock.writeLock().lock();
-			super.ref.add(0, element);
+			super.ref.addFirst(element);
 		} finally {
 			super.lock.writeLock().unlock();
 		}
@@ -54,7 +54,7 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 	public void addLast(@NotNull E element) {
 		try {
 			super.lock.writeLock().lock();
-			super.ref.add(element);
+			super.ref.addLast(element);
 		} finally {
 			super.lock.writeLock().unlock();
 		}
@@ -220,7 +220,12 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 	 */
 	@Override
 	public @NotNull ListIterator<E> listIterator(int index) {
-		return new ConcurrentListIterator(this.ref.toArray(), index);
+		try {
+			super.lock.readLock().lock();
+			return new ConcurrentListIterator(this.ref.toArray(), index);
+		} finally {
+			super.lock.readLock().unlock();
+		}
 	}
 
 	/**

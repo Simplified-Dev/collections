@@ -248,7 +248,12 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 	 */
 	@Override
 	public @NotNull Iterator<E> iterator() {
-		return new ConcurrentCollectionIterator(this.ref.toArray(), 0);
+		try {
+			this.lock.readLock().lock();
+			return new ConcurrentCollectionIterator(this.ref.toArray(), 0);
+		} finally {
+			this.lock.readLock().unlock();
+		}
 	}
 
 	/**
