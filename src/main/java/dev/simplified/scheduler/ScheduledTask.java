@@ -6,21 +6,25 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A handle for a task submitted to a {@link Scheduler}, wrapping a {@link ScheduledFuture}
+ * A handle for a task submitted to a {@link Scheduler}, wrapping a {@link Future}
  * and exposing lifecycle state (running, repeating, done, cancelled).
  * <p>
  * Each task is assigned a monotonically increasing {@linkplain #getId() id} at creation time.
  * A task may be <em>one-shot</em> (executes once after an initial delay) or <em>repeating</em>
  * (re-executes with a fixed delay between the end of one execution and the start of the next).
- * Repeating tasks use {@link ScheduledExecutorService#scheduleWithFixedDelay} so that long-running
- * executions do not cause catch-up bursts.
+ * <p>
+ * Platform-thread tasks use {@link ScheduledExecutorService#scheduleWithFixedDelay} for
+ * repeating execution. Virtual-thread tasks are <em>self-scheduled</em> - they manage delay
+ * and repetition internally via {@link TimeUnit#sleep}, yielding the carrier thread during
+ * waits so that no platform resources are consumed while idle.
  * <p>
  * Execution errors are caught, logged, and tracked via {@link #getConsecutiveErrors()}; the
  * counter resets to zero after every successful execution.
@@ -58,50 +62,74 @@ public final class ScheduledTask implements Runnable {
     /** {@code true} if this task was scheduled with a positive {@link #period}. */
     private volatile boolean repeating;
 
+    /** {@code true} after {@link #cancel()} has been called on this task. */
+    @Getter(AccessLevel.NONE)
+    private volatile boolean cancelled;
+
     /**
      * Rolling count of consecutive execution failures. Reset to zero after each
      * successful execution; incremented on each caught exception.
      */
     private AtomicInteger consecutiveErrors = new AtomicInteger(0);
 
+    /** {@code true} when this task manages its own delay and repeat via {@link TimeUnit#sleep}. */
+    @Getter(AccessLevel.NONE)
+    private final boolean async;
+
     @Getter(AccessLevel.NONE)
     private final @NotNull Runnable runnableTask;
 
     @Getter(AccessLevel.NONE)
-    private final @NotNull ScheduledFuture<?> scheduledFuture;
+    private final @NotNull Future<?> future;
 
     /**
      * Creates and immediately schedules a new task on the given executor.
      * <p>
-     * If {@code period} is greater than zero the task repeats using
-     * {@link ScheduledExecutorService#scheduleWithFixedDelay}; otherwise it is
-     * scheduled as a one-shot via {@link ScheduledExecutorService#schedule}.
+     * Synchronous tasks ({@code async = false}) require a {@link ScheduledExecutorService}
+     * and delegate delay and repetition to the executor via
+     * {@link ScheduledExecutorService#schedule} or
+     * {@link ScheduledExecutorService#scheduleWithFixedDelay}.
+     * <p>
+     * Asynchronous tasks ({@code async = true}) are submitted immediately via
+     * {@link ExecutorService#submit} and manage their own delay and repetition internally
+     * via {@link TimeUnit#sleep}, making them suitable for virtual thread executors where
+     * sleeping yields the carrier thread rather than blocking a platform thread.
      *
      * @param executorService the executor that will run this task
      * @param task            the work to execute
      * @param initialDelay    the delay before the first execution
-     * @param period          the delay between end-of-execution and the next start ({@code 0} for one-shot)
-     * @param timeUnit        the time unit for {@code initialDelay} and {@code period}
+     * @param repeatDelay          the delay between end-of-execution and the next start ({@code 0} for one-shot)
+     * @param timeUnit        the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @param async           {@code true} for self-scheduled virtual-thread execution;
+     *                        {@code false} for platform-thread scheduling
      */
     ScheduledTask(
-        @NotNull ScheduledExecutorService executorService,
+        @NotNull ExecutorService executorService,
         @NotNull final Runnable task,
         @Range(from = 0, to = Long.MAX_VALUE) long initialDelay,
-        @Range(from = 0, to = Long.MAX_VALUE) long period,
-        @NotNull TimeUnit timeUnit
+        @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay,
+        @NotNull TimeUnit timeUnit,
+        boolean async
     ) {
         this.id = currentId.getAndIncrement();
         this.runnableTask = task;
         this.initialDelay = initialDelay;
-        this.period = period;
+        this.period = repeatDelay;
         this.timeUnit = timeUnit;
         this.repeating = this.period > 0;
+        this.async = async;
 
         // Schedule Task
-        if (this.isRepeating())
-            this.scheduledFuture = executorService.scheduleWithFixedDelay(this, initialDelay, period, timeUnit);
-        else
-            this.scheduledFuture = executorService.schedule(this, initialDelay, timeUnit);
+        if (async)
+            this.future = executorService.submit(this);
+        else {
+            ScheduledExecutorService scheduledExecutor = (ScheduledExecutorService) executorService;
+
+            if (this.isRepeating())
+                this.future = scheduledExecutor.scheduleWithFixedDelay(this, initialDelay, repeatDelay, timeUnit);
+            else
+                this.future = scheduledExecutor.schedule(this, initialDelay, timeUnit);
+        }
     }
 
     /**
@@ -109,47 +137,91 @@ public final class ScheduledTask implements Runnable {
      * <p>
      * Equivalent to {@code cancel(false)}.
      *
+     * @return {@code true} if the task was successfully cancelled
      * @see #cancel(boolean)
      */
-    public void cancel() {
-        this.cancel(false);
+    public boolean cancel() {
+        return this.cancel(false);
     }
 
     /**
      * Attempts to cancel this task, optionally interrupting a running execution.
      * <p>
-     * If the underlying {@link ScheduledFuture#cancel(boolean)} call succeeds, the
-     * {@link #repeating} and {@link #running} flags are cleared. If cancellation fails
-     * (e.g. the task already completed), the flags are left unchanged.
+     * For synchronous (platform-thread) tasks, cancellation delegates directly to the
+     * underlying {@link Future#cancel(boolean)}. For asynchronous (virtual-thread) tasks,
+     * a volatile flag is also set to signal the internal sleep loop to exit.
      *
      * @param mayInterruptIfRunning {@code true} to interrupt the executing thread;
      *                              {@code false} to allow in-progress execution to finish
+     * @return {@code true} if the task was successfully cancelled
      */
-    public void cancel(boolean mayInterruptIfRunning) {
-        if (this.scheduledFuture.cancel(mayInterruptIfRunning)) {
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        // future.cancel(false) returns false for actively running tasks; for async tasks
+        // the volatile cancelled flag signals the sleep loop to exit instead.
+        boolean result = this.future.cancel(mayInterruptIfRunning) || (this.async && !this.future.isDone());
+
+        if (result) {
+            this.cancelled = true;
             this.repeating = false;
             this.running = false;
         }
+
+        return result;
     }
 
     /**
      * Returns whether this task has completed, either normally, via cancellation, or
      * due to an exception (for one-shot tasks).
      *
-     * @return {@code true} if the underlying future is done
+     * @return {@code true} if the task is done or has been cancelled
      */
     public boolean isDone() {
-        return this.scheduledFuture.isDone();
+        return this.cancelled || this.future.isDone();
     }
 
     /**
      * Returns whether this task was cancelled before it completed normally.
      *
-     * @return {@code true} if the underlying future was cancelled
+     * @return {@code true} if the task has been cancelled
      * @see #cancel(boolean)
      */
     public boolean isCanceled() {
-        return this.scheduledFuture.isCancelled();
+        return this.cancelled || this.future.isCancelled();
+    }
+
+    /**
+     * Executes this task, dispatching to the appropriate execution strategy.
+     * <p>
+     * Synchronous tasks execute the wrapped {@link Runnable} once per invocation.
+     * Asynchronous tasks handle their own initial delay and repeat loop internally
+     * via {@link TimeUnit#sleep}.
+     */
+    @Override
+    public void run() {
+        if (this.async)
+            this.runSelfScheduled();
+        else
+            this.executeTask();
+    }
+
+    /**
+     * Manages the delay-sleep-execute-repeat loop for async virtual-thread tasks.
+     */
+    private void runSelfScheduled() {
+        try {
+            if (this.initialDelay > 0)
+                this.timeUnit.sleep(this.initialDelay);
+
+            do {
+                if (this.cancelled) return;
+                this.executeTask();
+
+                if (this.repeating && !this.cancelled)
+                    this.timeUnit.sleep(this.period);
+            } while (this.repeating && !this.cancelled);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
@@ -157,10 +229,8 @@ public final class ScheduledTask implements Runnable {
      * logging any exceptions. On success the {@link #consecutiveErrors} counter is
      * reset to zero; on failure it is incremented.
      */
-    @Override
-    public void run() {
+    private void executeTask() {
         try {
-            // Run Task
             this.running = true;
             this.runnableTask.run();
             this.consecutiveErrors.set(0);

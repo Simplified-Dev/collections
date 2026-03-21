@@ -6,26 +6,31 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A dual-executor task scheduler that supports both serial (synchronous) and parallel
+ * A dual-executor task scheduler that supports serial (synchronous) and virtual-thread
  * (asynchronous) execution of one-shot and repeating {@link ScheduledTask}s.
  * <p>
- * Internally the scheduler maintains two {@link ScheduledExecutorService} instances:
+ * Internally the scheduler maintains two executors:
  * <ul>
- *   <li><b>syncExecutor</b> - a single-threaded executor for serial tasks; only one
- *       synchronous task runs at a time, making it safe for lightweight, ordering-sensitive work.</li>
- *   <li><b>asyncExecutor</b> - a thread-pool executor (sized to available processors by default)
- *       for concurrent tasks.</li>
+ *   <li><b>syncExecutor</b> - a single-threaded {@link ScheduledExecutorService} for serial tasks;
+ *       only one synchronous task runs at a time, making it safe for lightweight,
+ *       ordering-sensitive work.</li>
+ *   <li><b>virtualExecutor</b> - a virtual-thread-per-task {@link ExecutorService} for all
+ *       asynchronous tasks. Delayed and repeating async tasks manage their own timing
+ *       internally via {@link TimeUnit#sleep}, yielding the carrier thread during waits
+ *       so that no platform resources are consumed while idle.</li>
  * </ul>
  * A background cleaner task runs on the sync executor every 30 seconds to purge completed
  * tasks from the internal task list. The cleaner is cancelled automatically on {@link #shutdown()}.
  * <p>
  * The {@link Executor} contract is implemented by delegating {@link #execute(Runnable)} to
- * the async executor, so this scheduler can be passed anywhere an {@code Executor} is expected.
+ * the virtual thread executor, so this scheduler can be passed anywhere an {@code Executor}
+ * is expected.
  *
  * @see ScheduledTask
  */
@@ -34,8 +39,8 @@ public final class Scheduler implements Executor {
     /** Single-threaded executor for synchronous (serial) task scheduling. */
     private final @NotNull ScheduledExecutorService syncExecutor;
 
-    /** Multi-threaded executor for asynchronous (parallel) task scheduling. */
-    private final @NotNull ScheduledExecutorService asyncExecutor;
+    /** Virtual-thread executor for all asynchronous tasks. */
+    private final @NotNull ExecutorService virtualExecutor;
 
     /** All user-submitted tasks tracked by this scheduler. */
     private final @NotNull ConcurrentList<ScheduledTask> tasks = Concurrent.newList();
@@ -44,25 +49,12 @@ public final class Scheduler implements Executor {
     private final @NotNull ScheduledTask cleanerTask;
 
     /**
-     * Creates a new scheduler with thread pool size equal to the number of available processors.
-     *
-     * @see #Scheduler(int)
+     * Creates a new scheduler with a single-threaded sync executor and a virtual-thread
+     * async executor.
      */
     public Scheduler() {
-        this(Runtime.getRuntime().availableProcessors());
-    }
-
-    /**
-     * Creates a new scheduler with the specified async thread pool size.
-     * <p>
-     * A background cleaner task is immediately scheduled on the sync executor to remove
-     * completed tasks from the internal list every 30 seconds (after a 1-second initial delay).
-     *
-     * @param corePoolSize the number of threads in the async executor pool
-     */
-    public Scheduler(int corePoolSize) {
         this.syncExecutor = Executors.newSingleThreadScheduledExecutor();
-        this.asyncExecutor = Executors.newScheduledThreadPool(corePoolSize);
+        this.virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
         // Schedule Permanent Cleaner
         this.cleanerTask = new ScheduledTask(
@@ -70,7 +62,8 @@ public final class Scheduler implements Executor {
             () -> this.tasks.removeIf(ScheduledTask::isDone),
             1_000,
             30_000,
-            TimeUnit.MILLISECONDS
+            TimeUnit.MILLISECONDS,
+            false
         );
     }
 
@@ -218,7 +211,7 @@ public final class Scheduler implements Executor {
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {
-        return this.scheduleTask(task, initialDelay, repeatDelay, false, timeUnit);
+        return this.scheduleTask(task, initialDelay, repeatDelay, timeUnit, false);
     }
 
     /**
@@ -270,16 +263,17 @@ public final class Scheduler implements Executor {
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {
-        return this.scheduleTask(task, initialDelay, repeatDelay, true, timeUnit);
+        return this.scheduleTask(task, initialDelay, repeatDelay, timeUnit, true);
     }
 
-    private @NotNull ScheduledTask scheduleTask(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, boolean async, @NotNull TimeUnit timeUnit) {
+    private @NotNull ScheduledTask scheduleTask(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit, boolean async) {
         ScheduledTask scheduledTask = new ScheduledTask(
-            async ? this.asyncExecutor : this.syncExecutor,
+            async ? this.virtualExecutor : this.syncExecutor,
             task,
             initialDelay,
             repeatDelay,
-            timeUnit
+            timeUnit,
+            async
         );
 
         this.tasks.add(scheduledTask);
@@ -289,7 +283,7 @@ public final class Scheduler implements Executor {
     /**
      * Initiates an orderly shutdown of this scheduler.
      * <p>
-     * The internal cleaner task is cancelled first, then both the sync and async executors
+     * The internal cleaner task is cancelled first, then both executors (sync and virtual)
      * are shut down. Previously submitted tasks will still run to completion, but no new
      * tasks will be accepted.
      *
@@ -299,17 +293,17 @@ public final class Scheduler implements Executor {
     public void shutdown() {
         this.cleanerTask.cancel();
         this.syncExecutor.shutdown();
-        this.asyncExecutor.shutdown();
+        this.virtualExecutor.shutdown();
     }
 
     /**
      * Returns whether both executors have been shut down.
      *
-     * @return {@code true} if both the sync and async executors have been shut down
+     * @return {@code true} if the sync and virtual executors have both been shut down
      * @see #shutdown()
      */
     public boolean isShutdown() {
-        return this.syncExecutor.isShutdown() && this.asyncExecutor.isShutdown();
+        return this.syncExecutor.isShutdown() && this.virtualExecutor.isShutdown();
     }
 
     /**
@@ -317,24 +311,25 @@ public final class Scheduler implements Executor {
      * <p>
      * A terminated executor has completed all submitted tasks and released its threads.
      *
-     * @return {@code true} if both the sync and async executors have terminated
+     * @return {@code true} if the sync and virtual executors have both terminated
      * @see #shutdown()
      */
     public boolean isTerminated() {
-        return this.syncExecutor.isTerminated() && this.asyncExecutor.isTerminated();
+        return this.syncExecutor.isTerminated() && this.virtualExecutor.isTerminated();
     }
 
     /**
-     * Submits a command for asynchronous execution on the async executor.
+     * Submits a command for execution on the virtual thread executor.
      * <p>
      * This method satisfies the {@link Executor} contract, allowing this scheduler to be
-     * used wherever an {@code Executor} is expected.
+     * used wherever an {@code Executor} is expected. Tasks run on virtual threads, making
+     * this ideal for I/O-bound work.
      *
      * @param command the runnable task to execute
      */
     @Override
     public void execute(@NotNull Runnable command) {
-        this.asyncExecutor.execute(command);
+        this.virtualExecutor.execute(command);
     }
 
 }

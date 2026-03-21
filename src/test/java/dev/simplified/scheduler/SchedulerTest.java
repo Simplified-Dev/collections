@@ -106,7 +106,7 @@ class SchedulerTest {
         void cancel_preventsExecution() throws Exception {
             AtomicBoolean ran = new AtomicBoolean(false);
             ScheduledTask task = scheduler.schedule(() -> ran.set(true), 500);
-            task.cancel();
+            assertTrue(task.cancel());
             Thread.sleep(700);
             assertFalse(ran.get());
         }
