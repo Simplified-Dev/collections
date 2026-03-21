@@ -203,7 +203,7 @@ public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> 
 	 */
 	@Override
 	public @NotNull Iterator<E> descendingIterator() {
-		throw new UnsupportedOperationException("This is currently not implemented!");
+		throw new UnsupportedOperationException("This is currently not implemented");
 	}
 
 }

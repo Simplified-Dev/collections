@@ -49,7 +49,7 @@ public final class Concurrent {
 	 * @return a merge function that rejects duplicates
 	 */
 	private static <T> @NotNull BinaryOperator<T> throwingMerger() {
-		return (key, value) -> { throw new IllegalStateException(String.format("Duplicate key %s!", key)); };
+		return (key, value) -> { throw new IllegalStateException(String.format("Duplicate key %s", key)); };
 	}
 
 	/**

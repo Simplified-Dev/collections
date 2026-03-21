@@ -60,7 +60,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, S>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw new JpaException("Invalid match type '%s'.", match);
+            throw new JpaException("Invalid match type '%s'", match);
 
         return itemsCopy;
     }
@@ -93,7 +93,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, List<S>>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw new JpaException("Invalid match type '%s'.", match);
+            throw new JpaException("Invalid match type '%s'", match);
 
         return itemsCopy;
     }
