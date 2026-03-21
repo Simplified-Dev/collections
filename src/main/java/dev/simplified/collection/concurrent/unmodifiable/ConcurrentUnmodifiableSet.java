@@ -6,17 +6,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * An unmodifiable concurrent set that allows for simultaneous fast reading and iteration utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the set by replacing the
- * entire set each modification. This allows for maintaining the original speed
- * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
+ * An unmodifiable thread-safe set backed by a {@link HashSet} that permits concurrent reads
+ * but rejects all modifications. Mutating operations throw {@link UnsupportedOperationException}.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this set
  */
 public class ConcurrentUnmodifiableSet<E> extends ConcurrentSet<E> {
 
@@ -42,36 +38,57 @@ public class ConcurrentUnmodifiableSet<E> extends ConcurrentSet<E> {
 		super(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean add(@NotNull E element) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean addAll(@NotNull Collection<? extends E> collection) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean addIf(@NotNull Supplier<Boolean> predicate, @NotNull E element) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void clear() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean remove(Object item) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean removeAll(@NotNull Collection<?> collection) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean retainAll(@NotNull Collection<?> collection) {
 		throw new UnsupportedOperationException();

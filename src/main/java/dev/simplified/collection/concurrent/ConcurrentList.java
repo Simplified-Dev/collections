@@ -9,18 +9,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
- * A concurrent list that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the list by replacing the
- * entire list on each modification. This allows for maintaining the original
- * speed of {@link ArrayList#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe list backed by an {@link ArrayList} with concurrent read and write access
+ * via {@link java.util.concurrent.locks.ReadWriteLock}. Supports indexed access, sorting,
+ * and snapshot-based iteration.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this list
  */
 @SuppressWarnings("all")
 public class ConcurrentList<E> extends AtomicList<E, ArrayList<E>> {
@@ -47,21 +43,25 @@ public class ConcurrentList<E> extends AtomicList<E, ArrayList<E>> {
 		super(collection == null ? new ArrayList<>() : new ArrayList<>(collection));
 	}
 
+	/**
+	 * Creates a new empty {@code ConcurrentList} instance, used internally for copy and sort operations.
+	 *
+	 * @return a new empty {@link ConcurrentList}
+	 */
 	@Override
 	protected final @NotNull AtomicList<E, ArrayList<E>> createEmpty() {
 		return Concurrent.newList();
 	}
 
 	/**
-	 * Returns a new {@code ConcurrentList} containing all elements from the current list
-	 * in reverse order. The reversal is performed on a snapshot of the current list,
-	 * ensuring that the original list remains unmodified.
+	 * Returns a new {@code ConcurrentList} with elements in reverse order.
+	 * The original list is not modified.
 	 *
-	 * @return A new {@code ConcurrentList} with the elements of the current list in reverse order.
+	 * @return a new reversed {@link ConcurrentList}
 	 */
 	@Override
-	public @NotNull ConcurrentList<E> inverse() {
-		return (ConcurrentList<E>) super.inverse();
+	public @NotNull ConcurrentList<E> reversed() {
+		return (ConcurrentList<E>) super.reversed();
 	}
 
 	/**
@@ -162,6 +162,12 @@ public class ConcurrentList<E> extends AtomicList<E, ArrayList<E>> {
 		return (ConcurrentList<E>) super.sorted(comparator);
 	}
 
+	/**
+	 * Returns an unmodifiable view of this {@code ConcurrentList}.
+	 * Attempts to modify the returned list will throw {@link UnsupportedOperationException}.
+	 *
+	 * @return an unmodifiable {@link ConcurrentList} containing the same elements
+	 */
 	public @NotNull ConcurrentList<E> toUnmodifiableList() {
 		return Concurrent.newUnmodifiableList(this);
 	}

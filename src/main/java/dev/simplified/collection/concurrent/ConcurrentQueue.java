@@ -1,24 +1,19 @@
 package dev.sbs.api.collection.concurrent;
 
 import dev.sbs.api.collection.concurrent.atomic.AtomicQueue;
+import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent queue that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the queue by replacing the
- * entire queue on each modification. This allows for maintaining the original
- * speed of {@link Queue#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe FIFO queue backed by a {@link ConcurrentLinkedList} with concurrent access.
+ * Supports standard queue operations: offer, peek, poll, and element retrieval.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this queue
  */
 public class ConcurrentQueue<E> extends AtomicQueue<E> {
 

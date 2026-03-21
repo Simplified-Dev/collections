@@ -10,6 +10,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
+/**
+ * A thread-safe abstract queue backed by a {@link ConcurrentLinkedList} for concurrent access.
+ * Provides atomic FIFO queue operations with element ordering guarantees.
+ *
+ * @param <E> the type of elements held in this queue
+ */
 public abstract class AtomicQueue<E> extends AbstractQueue<E> implements Queue<E> {
 
 	protected final @NotNull ConcurrentLinkedList<E> storage;

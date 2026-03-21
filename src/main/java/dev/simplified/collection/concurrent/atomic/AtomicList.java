@@ -6,8 +6,16 @@ import dev.sbs.api.collection.query.Sortable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Function;
 
+/**
+ * A thread-safe abstract list backed by a {@link ReadWriteLock} for concurrent access.
+ * Extends {@link AtomicCollection} to provide indexed access, sorting, and list iteration with atomic guarantees.
+ *
+ * @param <E> the type of elements in this list
+ * @param <T> the type of the underlying list
+ */
 public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<E, T> implements Sortable<E>, List<E> {
 
 	protected AtomicList(@NotNull T type) {
@@ -30,6 +38,32 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void addFirst(@NotNull E element) {
+		try {
+			super.lock.writeLock().lock();
+			super.ref.add(0, element);
+		} finally {
+			super.lock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addLast(@NotNull E element) {
+		try {
+			super.lock.writeLock().lock();
+			super.ref.add(element);
+		} finally {
+			super.lock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean addAll(int index, @NotNull Collection<? extends E> collection) {
 		try {
 			super.lock.writeLock().lock();
@@ -39,6 +73,11 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		}
 	}
 
+	/**
+	 * Creates a new empty instance of this atomic list type.
+	 *
+	 * @return a new empty {@code AtomicList} of the same concrete type
+	 */
 	protected abstract @NotNull AtomicList<E, T> createEmpty();
 
 	/**
@@ -54,24 +93,77 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		}
 	}
 
-	public final @NotNull Optional<E> getFirst() {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public E getFirst() {
 		try {
 			this.lock.readLock().lock();
-			return Optional.ofNullable(!this.ref.isEmpty() ? this.ref.get(0) : null);
+
+			if (this.ref.isEmpty())
+				throw new NoSuchElementException();
+
+			return this.ref.getFirst();
 		} finally {
 			this.lock.readLock().unlock();
 		}
 	}
 
-	public final @NotNull Optional<E> getLast() {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public E getLast() {
 		try {
 			this.lock.readLock().lock();
-			return Optional.ofNullable(!this.ref.isEmpty() ? this.ref.get(this.ref.size() - 1) : null);
+
+			if (this.ref.isEmpty())
+				throw new NoSuchElementException();
+
+			return this.ref.getLast();
 		} finally {
 			this.lock.readLock().unlock();
 		}
 	}
 
+	/**
+	 * Returns an {@link Optional} containing the first element of this list,
+	 * or an empty {@code Optional} if the list is empty.
+	 *
+	 * @return an {@code Optional} describing the first element, or an empty {@code Optional}
+	 */
+	public final @NotNull Optional<E> findFirst() {
+		try {
+			this.lock.readLock().lock();
+			return Optional.ofNullable(!this.ref.isEmpty() ? this.ref.getFirst() : null);
+		} finally {
+			this.lock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Returns an {@link Optional} containing the last element of this list,
+	 * or an empty {@code Optional} if the list is empty.
+	 *
+	 * @return an {@code Optional} describing the last element, or an empty {@code Optional}
+	 */
+	public final @NotNull Optional<E> findLast() {
+		try {
+			this.lock.readLock().lock();
+			return Optional.ofNullable(!this.ref.isEmpty() ? this.ref.getLast() : null);
+		} finally {
+			this.lock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Returns the element at the specified index, or the default value if the index is out of bounds.
+	 *
+	 * @param index the index of the element to return
+	 * @param defaultValue the default value to return if the index is out of bounds
+	 * @return the element at the specified index, or {@code defaultValue} if the index is out of range
+	 */
 	public final E getOrDefault(int index, E defaultValue) {
 		try {
 			this.lock.readLock().lock();
@@ -92,28 +184,6 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		} finally {
 			this.lock.readLock().unlock();
 		}
-	}
-
-	/**
-	 * Returns a new {@code List} containing all elements from the current list in reverse order.
-	 * The reversal is performed on a snapshot of the current list, ensuring that the original
-	 * list remains unmodified.
-	 *
-	 * @return A new {@code List} containing the elements of the current list in reverse order.
-	 */
-	public @NotNull List<E> inverse() {
-		List<E> snapshot;
-		try {
-			this.lock.readLock().lock();
-			snapshot = new ArrayList<>(this.ref);
-		} finally {
-			this.lock.readLock().unlock();
-		}
-
-		Collections.reverse(snapshot);
-		AtomicList<E, T> result = this.createEmpty();
-		result.ref.addAll(snapshot);
-		return result;
 	}
 
 	/**
@@ -166,14 +236,54 @@ public abstract class AtomicList<E, T extends List<E>> extends AtomicCollection<
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public final E removeFirst() {
-		return this.remove(0);
+		try {
+			super.lock.writeLock().lock();
+			return super.ref.removeFirst();
+		} finally {
+			super.lock.writeLock().unlock();
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public final E removeLast() {
-		return this.remove(this.size() - 1);
+		try {
+			super.lock.writeLock().lock();
+			return super.ref.removeLast();
+		} finally {
+			super.lock.writeLock().unlock();
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public @NotNull AtomicList<E, T> reversed() {
+		List<E> snapshot;
+		try {
+			this.lock.readLock().lock();
+			snapshot = new ArrayList<>(this.ref);
+		} finally {
+			this.lock.readLock().unlock();
+		}
+
+		Collections.reverse(snapshot);
+		AtomicList<E, T> result = this.createEmpty();
+		result.ref.addAll(snapshot);
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public E set(int index, E element) {
 		try {

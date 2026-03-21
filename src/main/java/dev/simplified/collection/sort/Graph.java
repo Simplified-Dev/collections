@@ -18,6 +18,14 @@ import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * A directed graph supporting topological sorting of nodes.
+ * <p>
+ * Nodes and edges are added via the {@link Builder}, and the resulting graph
+ * can be topologically sorted using {@link #topologicalSort()}.
+ *
+ * @param <T> the type of values stored in graph nodes
+ */
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Graph<T> {
@@ -26,10 +34,23 @@ public class Graph<T> {
     private final @NotNull ConcurrentList<T> edges;
     private final @NotNull ConcurrentMap<T, ConcurrentList<T>> nodeEdges;
 
+    /**
+     * Creates a new graph builder parameterized by the given type instance.
+     *
+     * @param type a representative instance used for type inference
+     * @param <T> the type of values stored in graph nodes
+     * @return a new builder
+     */
     public static <T> @NotNull Builder<T> builder(@NotNull T type) {
         return new Builder<>(type);
     }
 
+    /**
+     * Finds the node with the given value.
+     *
+     * @param value the value to search for
+     * @return the matching node
+     */
     private @NotNull Node<T> findNode(@NotNull T value) {
         return this.getNodes().findFirstOrNull(Node::getValue, value);
     }
@@ -79,6 +100,11 @@ public class Graph<T> {
         stack.push(node.getValue());
     }
 
+    /**
+     * A builder for constructing {@link Graph} instances with nodes and edges.
+     *
+     * @param <T> the type of values stored in graph nodes
+     */
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Builder<T> implements ClassBuilder<Graph<T>> {
 
@@ -88,6 +114,13 @@ public class Graph<T> {
         private final ConcurrentMap<T, ConcurrentList<T>> nodeEdges = Concurrent.newMap();
         private Optional<Function<T, Stream<T>>> edgeFunction = Optional.empty();
 
+        /**
+         * Adds a directed edge from {@code left} to {@code right}.
+         *
+         * @param left the source node value
+         * @param right the target node value
+         * @return this builder
+         */
         public Builder<T> withEdge(@NotNull T left, @NotNull T right) {
             if (!this.nodeEdges.containsKey(left))
                 this.nodeEdges.put(left, Concurrent.newList());
@@ -97,24 +130,54 @@ public class Graph<T> {
             return this;
         }
 
+        /**
+         * Sets a function that computes edges for each node value during {@link #build()}.
+         *
+         * @param function the edge function, or {@code null} to clear
+         * @return this builder
+         */
         public Builder<T> withEdgeFunction(@Nullable Function<T, Stream<T>> function) {
             return this.withEdgeFunction(Optional.ofNullable(function));
         }
 
+        /**
+         * Sets a function that computes edges for each node value during {@link #build()}.
+         *
+         * @param function an optional edge function
+         * @return this builder
+         */
         public Builder<T> withEdgeFunction(@NotNull Optional<Function<T, Stream<T>>> function) {
             this.edgeFunction = function;
             return this;
         }
 
+        /**
+         * Adds the given values as nodes in the graph.
+         *
+         * @param values the node values to add
+         * @return this builder
+         */
         public Builder<T> withValues(@NotNull T... values) {
             return this.withValues(Arrays.asList(values));
         }
 
+        /**
+         * Adds the given values as nodes in the graph.
+         *
+         * @param values the node values to add
+         * @return this builder
+         */
         public Builder<T> withValues(@NotNull Iterable<T> values) {
             values.forEach(this.values::add);
             return this;
         }
 
+        /**
+         * Builds the graph. If an edge function was provided, it is applied to each node value
+         * to compute edges before constructing the immutable graph.
+         *
+         * @return the constructed graph
+         */
         @Override
         public @NotNull Graph<T> build() {
             // Handle Edge Function
@@ -133,6 +196,11 @@ public class Graph<T> {
 
     }
 
+    /**
+     * A node in the graph holding a value and a visited flag for traversal.
+     *
+     * @param <T> the type of the node value
+     */
     @Getter
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     static class Node<T> {
@@ -141,6 +209,11 @@ public class Graph<T> {
         @Setter(AccessLevel.PRIVATE)
         private boolean visited;
 
+        /**
+         * Returns {@code true} if this node has not yet been visited during traversal.
+         *
+         * @return {@code true} if not visited
+         */
         public boolean notVisited() {
             return !this.isVisited();
         }

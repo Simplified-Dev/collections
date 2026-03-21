@@ -8,17 +8,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent set that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the set by replacing the
- * entire set each modification. This allows for maintaining the original speed
- * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe set backed by a {@link HashSet} with concurrent read and write access
+ * via {@link java.util.concurrent.locks.ReadWriteLock}. Enforces no-duplicate semantics
+ * with snapshot-based iteration.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this set
  */
 public class ConcurrentSet<E> extends AtomicSet<E, HashSet<E>> {
 
@@ -44,11 +40,22 @@ public class ConcurrentSet<E> extends AtomicSet<E, HashSet<E>> {
 		super(collection == null ? new HashSet<>() : new HashSet<>(collection));
 	}
 
+	/**
+	 * Creates a new empty {@code ConcurrentSet} instance, used internally for copy operations.
+	 *
+	 * @return a new empty {@link ConcurrentSet}
+	 */
 	@Override
 	protected final @NotNull AtomicCollection<E, HashSet<E>> createEmpty() {
 		return Concurrent.newSet();
 	}
 
+	/**
+	 * Returns an unmodifiable view of this {@code ConcurrentSet}.
+	 * Attempts to modify the returned set will throw {@link UnsupportedOperationException}.
+	 *
+	 * @return an unmodifiable {@link ConcurrentSet} containing the same elements
+	 */
 	public @NotNull ConcurrentSet<E> toUnmodifiableSet() {
 		return Concurrent.newUnmodifiableSet(this);
 	}

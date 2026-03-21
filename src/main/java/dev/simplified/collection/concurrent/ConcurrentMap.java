@@ -7,18 +7,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent map that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the map by replacing the
- * entire map each modification. This allows for maintaining the original speed
- * of {@link HashMap#containsKey(Object)} and {@link HashMap#containsValue(Object)} and makes it cross-thread-safe.
+ * A thread-safe map backed by a {@link HashMap} with concurrent read and write access
+ * via {@link java.util.concurrent.locks.ReadWriteLock}. Supports snapshot-based iteration
+ * over entries, keys, and values.
  *
- * @param <K> type of keys
- * @param <V> type of values
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values
  */
 public class ConcurrentMap<K, V> extends AtomicMap<K, V, AbstractMap<K, V>> {
 
@@ -44,21 +40,42 @@ public class ConcurrentMap<K, V> extends AtomicMap<K, V, AbstractMap<K, V>> {
         super(new HashMap<>(), map);
     }
 
+    /**
+     * Creates a new empty {@code ConcurrentSet} for holding map entries, used internally by entry set operations.
+     *
+     * @return a new empty {@link ConcurrentSet} of entries
+     */
     @Override
     protected final @NotNull ConcurrentSet<Entry<K, V>> createEmptyEntrySet() {
         return Concurrent.newSet();
     }
 
+    /**
+     * Creates a new empty {@code ConcurrentSet} for holding map keys, used internally by key set operations.
+     *
+     * @return a new empty {@link ConcurrentSet} of keys
+     */
     @Override
     protected final @NotNull ConcurrentSet<K> createEmptyKeySet() {
         return Concurrent.newSet();
     }
 
+    /**
+     * Creates a new empty {@code ConcurrentList} for holding map values, used internally by values operations.
+     *
+     * @return a new empty {@link ConcurrentList} of values
+     */
     @Override
     protected final @NotNull ConcurrentList<V> createEmptyValueList() {
         return Concurrent.newList();
     }
 
+    /**
+     * Returns an unmodifiable view of this {@code ConcurrentMap}.
+     * Attempts to modify the returned map will throw {@link UnsupportedOperationException}.
+     *
+     * @return an unmodifiable {@link ConcurrentMap} containing the same entries
+     */
     public @NotNull ConcurrentMap<K, V> toUnmodifiableMap() {
         return Concurrent.newUnmodifiableMap(this);
     }

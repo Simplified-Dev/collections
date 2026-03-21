@@ -7,10 +7,16 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * An abstract iterator that operates over a snapshot of an array, providing
+ * thread-safe iteration for concurrent collections.
+ *
+ * @param <E> the type of elements returned by this iterator
+ */
 @SuppressWarnings("unchecked")
 public abstract class ConcurrentIterator<E> implements Iterator<E> {
 
-	/** Snapshot of the array */
+	/** Snapshot of the array. */
 	protected Object[] snapshot;
 
 	/** Index of element to be returned by subsequent call to next. */
@@ -19,6 +25,12 @@ public abstract class ConcurrentIterator<E> implements Iterator<E> {
 	/** Index of last element to be returned. */
 	protected int last = -1;
 
+	/**
+	 * Creates a new iterator over the given snapshot starting at the specified index.
+	 *
+	 * @param snapshot the array snapshot to iterate over
+	 * @param index the starting index
+	 */
 	protected ConcurrentIterator(Object[] snapshot, int index) {
 		this.cursor = index;
 		this.snapshot = snapshot;
@@ -43,6 +55,9 @@ public abstract class ConcurrentIterator<E> implements Iterator<E> {
 			throw new NoSuchElementException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public abstract void remove();
 
 	/**

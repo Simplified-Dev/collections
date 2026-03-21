@@ -4,19 +4,14 @@ import dev.sbs.api.collection.concurrent.ConcurrentCollection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * An unmodifiable concurrent list that allows for simultaneous fast reading and iteration utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the list by replacing the
- * entire list on each modification. This allows for maintaining the original
- * speed of {@link ArrayList#contains(Object)} and makes it cross-thread-safe.
+ * An unmodifiable thread-safe collection that permits concurrent reads but rejects all modifications.
+ * Mutating operations throw {@link UnsupportedOperationException}.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this collection
  */
 public class ConcurrentUnmodifiableCollection<E> extends ConcurrentCollection<E> {
 
@@ -42,37 +37,58 @@ public class ConcurrentUnmodifiableCollection<E> extends ConcurrentCollection<E>
 		super(collection);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean add(@NotNull E element) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean addIf(@NotNull Supplier<Boolean> predicate, @NotNull E element) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean addAll(@NotNull Collection<? extends E> collection) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final void clear() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	@SuppressWarnings("all")
 	public final boolean remove(Object element) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean removeAll(@NotNull Collection<?> collection) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final boolean retainAll(@NotNull Collection<?> collection) {
 		throw new UnsupportedOperationException();

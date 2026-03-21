@@ -8,6 +8,12 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * A thread-safe abstract double-ended queue extending {@link AtomicQueue} with {@link Deque} operations.
+ * Supports element insertion and removal at both ends with atomic guarantees.
+ *
+ * @param <E> the type of elements held in this deque
+ */
 public abstract class AtomicDeque<E> extends AtomicQueue<E> implements Deque<E> {
 
 	protected AtomicDeque(@NotNull Collection<? extends E> collection) {

@@ -8,19 +8,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent set that allows for simultaneously fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the set by replacing the
- * entire set each modification. This allows for maintaining the original speed
- * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe set backed by a {@link LinkedHashSet} with concurrent read and write access
+ * via {@link java.util.concurrent.locks.ReadWriteLock}. Maintains insertion order while
+ * enforcing no-duplicate semantics.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this set
  */
 public class ConcurrentLinkedSet<E> extends AtomicSet<E, LinkedHashSet<E>> {
 
@@ -46,6 +41,11 @@ public class ConcurrentLinkedSet<E> extends AtomicSet<E, LinkedHashSet<E>> {
 		super(collection == null ? new LinkedHashSet<>() : new LinkedHashSet<>(collection));
 	}
 
+	/**
+	 * Creates a new empty {@code ConcurrentLinkedSet} instance, used internally for copy operations.
+	 *
+	 * @return a new empty {@link ConcurrentLinkedSet}
+	 */
 	@Override
 	protected @NotNull AtomicCollection<E, LinkedHashSet<E>> createEmpty() {
 		return Concurrent.newLinkedSet();

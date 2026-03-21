@@ -1,24 +1,19 @@
 package dev.sbs.api.collection.concurrent;
 
 import dev.sbs.api.collection.concurrent.atomic.AtomicDeque;
+import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent queue that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the queue by replacing the
- * entire queue on each modification. This allows for maintaining the original
- * speed of {@link Deque#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe double-ended queue backed by a {@link ConcurrentLinkedList} with concurrent access.
+ * Supports element insertion and removal at both ends with FIFO and LIFO semantics.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this deque
  */
 public class ConcurrentDeque<E> extends AtomicDeque<E> {
 

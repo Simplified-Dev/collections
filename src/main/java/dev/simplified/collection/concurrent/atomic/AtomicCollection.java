@@ -22,6 +22,13 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 
+/**
+ * A thread-safe abstract collection backed by a {@link ReadWriteLock} for concurrent access.
+ * Provides atomic read and write operations on an underlying collection of type {@code T}.
+ *
+ * @param <E> the type of elements in this collection
+ * @param <T> the type of the underlying collection
+ */
 @SuppressWarnings("all")
 public abstract class AtomicCollection<E, T extends Collection<E>> extends AbstractCollection<E> implements Collection<E>, Searchable<E>, Serializable {
 
@@ -45,6 +52,12 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Adds all of the specified elements to this collection.
+	 *
+	 * @param collection the elements to be added to this collection
+	 * @return {@code true} if this collection changed as a result of the call
+	 */
 	public final boolean addAll(@NotNull E... collection) {
 		return this.addAll(Arrays.asList(collection));
 	}
@@ -62,6 +75,13 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Adds the specified element to this collection only if the given supplier returns {@code true}.
+	 *
+	 * @param predicate the supplier that determines whether the element should be added
+	 * @param element the element to add
+	 * @return {@code true} if the element was added to this collection
+	 */
 	public boolean addIf(@NotNull Supplier<Boolean> predicate, @NotNull E element) {
 		try {
 			this.lock.writeLock().lock();
@@ -75,6 +95,14 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Adds the specified element to this collection only if the given predicate,
+	 * tested against the underlying collection, returns {@code true}.
+	 *
+	 * @param predicate the predicate to test against the underlying collection
+	 * @param element the element to add
+	 * @return {@code true} if the element was added to this collection
+	 */
 	public boolean addIf(@NotNull Predicate<T> predicate, @NotNull E element) {
 		try {
 			this.lock.writeLock().lock();
@@ -114,6 +142,15 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Returns {@code true} if this collection contains an element whose value,
+	 * extracted by the given function, equals the specified value.
+	 *
+	 * @param <S> the type of the extracted value
+	 * @param function the function to extract a value from each element
+	 * @param value the value to search for
+	 * @return {@code true} if a matching element is found
+	 */
 	public final <S> boolean contains(@NotNull Function<E, S> function, S value) {
 		try {
 			this.lock.readLock().lock();
@@ -142,6 +179,11 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Creates a new empty instance of this atomic collection type.
+	 *
+	 * @return a new empty {@code AtomicCollection} of the same concrete type
+	 */
 	protected abstract @NotNull AtomicCollection<E, T> createEmpty();
 
 	/**
@@ -168,10 +210,22 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		}
 	}
 
+	/**
+	 * Returns a sequential {@link TripleStream} where each element is paired with its index and the total size.
+	 *
+	 * @return a sequential indexed stream of this collection's elements
+	 */
 	public final @NotNull TripleStream<E, Long, Long> indexedStream() {
 		return this.indexedStream(false);
 	}
 
+	/**
+	 * Returns a {@link TripleStream} where each element is paired with its index and the total size,
+	 * optionally in parallel.
+	 *
+	 * @param parallel {@code true} to create a parallel stream, {@code false} for sequential
+	 * @return an indexed stream of this collection's elements
+	 */
 	public final @NotNull TripleStream<E, Long, Long> indexedStream(boolean parallel) {
 		return StreamUtil.zipWithIndex(this.spliterator(), parallel);
 	}
@@ -197,10 +251,21 @@ public abstract class AtomicCollection<E, T extends Collection<E>> extends Abstr
 		return new ConcurrentCollectionIterator(this.ref.toArray(), 0);
 	}
 
+	/**
+	 * Returns {@code true} if this collection does not contain the specified element.
+	 *
+	 * @param item the element whose absence is to be tested
+	 * @return {@code true} if this collection does not contain the specified element
+	 */
 	public final boolean notContains(Object item) {
 		return !this.contains(item);
 	}
 
+	/**
+	 * Returns {@code true} if this collection contains at least one element.
+	 *
+	 * @return {@code true} if this collection is not empty
+	 */
 	public final boolean notEmpty() {
 		return !this.isEmpty();
 	}

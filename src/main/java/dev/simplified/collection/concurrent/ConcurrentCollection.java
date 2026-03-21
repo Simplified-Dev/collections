@@ -8,18 +8,13 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A concurrent collection that allows for simultaneous fast reading, iteration and
- * modification utilizing {@link AtomicReference}.
- * <p>
- * The AtomicReference changes the methods that modify the set by replacing the
- * entire set each modification. This allows for maintaining the original speed
- * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
+ * A thread-safe collection backed by an {@link AbstractCollection} with concurrent read and write access
+ * via {@link java.util.concurrent.locks.ReadWriteLock}. Provides the base concrete implementation of
+ * {@link AtomicCollection}.
  *
- * @param <E> type of elements
+ * @param <E> the type of elements in this collection
  */
 public class ConcurrentCollection<E> extends AtomicCollection<E, AbstractCollection<E>> {
 
@@ -45,6 +40,11 @@ public class ConcurrentCollection<E> extends AtomicCollection<E, AbstractCollect
 		super(collection == null ? new ArrayList<>() : new ArrayList<>(collection));
 	}
 
+	/**
+	 * Creates a new empty {@code ConcurrentCollection} instance, used internally for copy operations.
+	 *
+	 * @return a new empty {@link ConcurrentCollection}
+	 */
 	@Override
 	protected final @NotNull AtomicCollection<E, AbstractCollection<E>> createEmpty() {
 		return Concurrent.newCollection();
