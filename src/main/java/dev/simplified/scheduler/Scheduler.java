@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Internally the scheduler maintains two {@link ScheduledExecutorService} instances:
  * <ul>
- *   <li><b>syncExecutor</b> — a single-threaded executor for serial tasks; only one
+ *   <li><b>syncExecutor</b> - a single-threaded executor for serial tasks; only one
  *       synchronous task runs at a time, making it safe for lightweight, ordering-sensitive work.</li>
- *   <li><b>asyncExecutor</b> — a thread-pool executor (sized to available processors by default)
+ *   <li><b>asyncExecutor</b> - a thread-pool executor (sized to available processors by default)
  *       for concurrent tasks.</li>
  * </ul>
  * A background cleaner task runs on the sync executor every 30 seconds to purge completed
@@ -150,7 +150,7 @@ public final class Scheduler implements Executor {
     /**
      * Schedules a repeating synchronous task with no initial delay and a 50-millisecond period.
      * <p>
-     * <b>Warning:</b> synchronous tasks share a single thread — avoid heavy or blocking work.
+     * <b>Warning:</b> synchronous tasks share a single thread - avoid heavy or blocking work.
      *
      * @param task the work to execute
      * @return the scheduled task handle
