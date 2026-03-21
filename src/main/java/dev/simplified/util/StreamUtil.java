@@ -22,12 +22,16 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Utility methods for working with {@link Stream} instances, including indexed mapping,
+ * element modification, and specialized collectors.
+ */
 @UtilityClass
 public final class StreamUtil {
 
     /**
-     * Returns a predicate that maintains state about previously encountered keys
-     * and allows distinct elements based on the key extracted using the provided keyExtractor function.
+     * Returns a stateful predicate that filters elements to only those with distinct keys,
+     * as extracted by the given function.
      *
      * @param <T> the type of input to the predicate
      * @param keyExtractor a function that extracts a key from an element
@@ -40,12 +44,12 @@ public final class StreamUtil {
 
     /**
      * Concatenates the contents of a variable number of arrays into a single unified stream.
-     * <p>
-     * Null arrays are filtered out.
      *
-     * @param <T>    The type of elements in the arrays and the resulting stream.
-     * @param arrays The arrays to be combined into a single stream. Can include NULL.
-     * @return A stream containing all the elements from the provided arrays.
+     * <p>Null arrays are filtered out.
+     *
+     * @param <T> the type of elements in the arrays and the resulting stream
+     * @param arrays the arrays to be combined into a single stream; may include {@code null} entries
+     * @return a stream containing all the elements from the provided arrays
      */
     public static <T> @NotNull Stream<T> ofArrays(@Nullable T[]... arrays) {
         Stream<T> stream = Stream.empty();
@@ -57,27 +61,65 @@ public final class StreamUtil {
     }
 
     /**
-     * Zips the specified stream with its indices.
+     * Zips the specified stream with its indices, producing a {@link TripleStream} of
+     * {@code (element, index, size)}.
+     *
+     * @param <T> the element type
+     * @param stream the source stream
+     * @return a triple stream where each triple contains the element, its zero-based index, and the estimated size
      */
     public static <T> @NotNull TripleStream<T, Long, Long> zipWithIndex(@NotNull Stream<T> stream) {
         return zipWithIndex(stream.spliterator(), stream.isParallel());
     }
 
     /**
-     * Zips the specified spliterator with its indices.
+     * Zips the specified spliterator with its indices, producing a {@link TripleStream} of
+     * {@code (element, index, size)}.
+     *
+     * @param <T> the element type
+     * @param spliterator the source spliterator
+     * @param parallel whether the resulting stream should be parallel
+     * @return a triple stream where each triple contains the element, its zero-based index, and the estimated size
      */
     public static <T> @NotNull TripleStream<T, Long, Long> zipWithIndex(@NotNull Spliterator<T> spliterator, boolean parallel) {
         return TripleStream.of(mapWithIndex(spliterator, parallel, Triple::of));
     }
 
+    /**
+     * Wraps the given stream into an indexed stream of {@link Triple} elements containing
+     * {@code (element, index, size)}.
+     *
+     * @param <T> the element type
+     * @param stream the source stream
+     * @return a stream of triples containing each element, its zero-based index, and the estimated size
+     */
     public static <T> @NotNull Stream<Triple<T, Long, Long>> indexedStream(@NotNull Stream<T> stream) {
         return indexedStream(stream.spliterator(), stream.isParallel()).onClose(stream::close);
     }
 
+    /**
+     * Wraps the given spliterator into an indexed stream of {@link Triple} elements containing
+     * {@code (element, index, size)}.
+     *
+     * @param <T> the element type
+     * @param spliterator the source spliterator
+     * @param parallel whether the resulting stream should be parallel
+     * @return a stream of triples containing each element, its zero-based index, and the estimated size
+     */
     public static <T> @NotNull Stream<Triple<T, Long, Long>> indexedStream(@NotNull Spliterator<T> spliterator, boolean parallel) {
         return mapWithIndex(spliterator, parallel, Triple::of);
     }
 
+    /**
+     * Applies the given function to each element of the stream along with its zero-based index
+     * and the estimated stream size.
+     *
+     * @param <T> the input element type
+     * @param <R> the output element type
+     * @param stream the source stream
+     * @param function a function accepting {@code (element, index, size)} and producing the mapped result
+     * @return a stream of mapped results
+     */
     @SuppressWarnings("unchecked")
     public static <T, R> @NotNull Stream<R> mapWithIndex(@NotNull Stream<T> stream, @NotNull TriFunction<? super T, Long, Long, ? extends R> function) {
         return (Stream<R>) mapWithIndex(stream.spliterator(), stream.isParallel(), function).onClose(stream::close);
@@ -85,7 +127,7 @@ public final class StreamUtil {
 
     /**
      * Returns a stream consisting of the results of applying the given function to the elements of
-     * {@code stream} and their indices in the stream. For example,
+     * the source spliterator and their indices. For example,
      *
      * <pre>{@code
      * mapWithIndex(
@@ -97,13 +139,20 @@ public final class StreamUtil {
      *
      * <p>The resulting stream is <a
      * href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently splittable</a>
-     * if and only if {@code stream} was efficiently splittable and its underlying spliterator
+     * if and only if the source was efficiently splittable and its underlying spliterator
      * reported {@link Spliterator#SUBSIZED}. This is generally the case if the underlying stream
      * comes from a data structure supporting efficient indexed random access, typically an array or
      * list.
      *
      * <p>The order of the resulting stream is defined if and only if the order of the original stream
      * was defined.
+     *
+     * @param <T> the input element type
+     * @param <R> the output element type
+     * @param spliterator the source spliterator
+     * @param parallel whether the resulting stream should be parallel
+     * @param function a function accepting {@code (element, index, size)} and producing the mapped result
+     * @return a stream of mapped results
      */
     public static <T, R> @NotNull Stream<R> mapWithIndex(@NotNull Spliterator<T> spliterator, boolean parallel, @NotNull TriFunction<? super T, Long, Long, ? extends R> function) {
         long size = spliterator.estimateSize();
@@ -165,30 +214,86 @@ public final class StreamUtil {
         }
     }
 
+    /**
+     * Transforms each element in the stream using a function that also receives the element's
+     * zero-based index and the estimated stream size.
+     *
+     * @param <T> the element type
+     * @param stream the source stream
+     * @param modFunction a function accepting {@code (element, index, size)} and returning the modified element
+     * @return a stream of modified elements
+     */
     public static <T> @NotNull Stream<T> modifyStream(@NotNull Stream<T> stream, @NotNull TriFunction<T, Long, Long, T> modFunction) {
         return mapWithIndex(stream, modFunction);
     }
 
+    /**
+     * Appends the given value to each element in the string stream.
+     *
+     * @param stringStream the source stream of strings
+     * @param entryValue the value to append to every element
+     * @return a stream with the value appended to each element
+     */
     public static @NotNull Stream<String> appendEach(@NotNull Stream<String> stringStream, @NotNull String entryValue) {
         return appendEach(stringStream, entryValue, entryValue);
     }
 
+    /**
+     * Appends a value to each element in the string stream, using a different value for
+     * the last element.
+     *
+     * @param stringStream the source stream of strings
+     * @param entryValue the value to append to all elements except the last
+     * @param lastEntry the value to append to the last element
+     * @return a stream with the appropriate value appended to each element
+     */
     public static @NotNull Stream<String> appendEach(@NotNull Stream<String> stringStream, @NotNull String entryValue, @NotNull String lastEntry) {
         return modifyStream(stringStream, (value, index, size) -> value + (index < size - 1 ? entryValue : lastEntry));
     }
 
+    /**
+     * Prepends the given value to each element in the string stream.
+     *
+     * @param stringStream the source stream of strings
+     * @param entryValue the value to prepend to every element
+     * @return a stream with the value prepended to each element
+     */
     public static @NotNull Stream<String> prependEach(@NotNull Stream<String> stringStream, @NotNull String entryValue) {
         return prependEach(stringStream, entryValue, entryValue);
     }
 
+    /**
+     * Prepends a value to each element in the string stream, using a different value for
+     * the last element.
+     *
+     * @param stringStream the source stream of strings
+     * @param entryValue the value to prepend to all elements except the last
+     * @param lastEntry the value to prepend to the last element
+     * @return a stream with the appropriate value prepended to each element
+     */
     public static @NotNull Stream<String> prependEach(@NotNull Stream<String> stringStream, @NotNull String entryValue, @NotNull String lastEntry) {
         return modifyStream(stringStream, (value, index, size) -> (index < size - 1 ? entryValue : lastEntry) + value);
     }
 
+    /**
+     * Collects stream elements into a {@link StringBuilder}, appending a system line separator
+     * after each element.
+     *
+     * @param <E> the element type
+     * @return a collector that produces a {@link StringBuilder}
+     */
     public static <E> @NotNull Collector<E, ?, StringBuilder> toStringBuilder() {
         return toStringBuilder(true);
     }
 
+    /**
+     * Collects stream elements into a {@link StringBuilder}, optionally appending a system
+     * line separator after each element.
+     *
+     * @param <E> the element type
+     * @param newLine {@code true} to append a line separator after each element, {@code false} to concatenate directly
+     * @return a collector that produces a {@link StringBuilder}
+     */
     public static <E> @NotNull Collector<E, ?, StringBuilder> toStringBuilder(boolean newLine) {
         return Collector.of(
             StringBuilder::new,
@@ -204,6 +309,14 @@ public final class StreamUtil {
         );
     }
 
+    /**
+     * Collects stream elements into a {@link StringBuilder}, inserting the given separator
+     * after each element.
+     *
+     * @param <E> the element type
+     * @param separator the string to insert between elements
+     * @return a collector that produces a {@link StringBuilder}
+     */
     public static <E> @NotNull Collector<E, ?, StringBuilder> toStringBuilder(@NotNull String separator) {
         return Collector.of(
             StringBuilder::new,
@@ -212,6 +325,14 @@ public final class StreamUtil {
         );
     }
 
+    /**
+     * Abstract spliterator that tracks a running index while delegating element traversal
+     * to a wrapped source spliterator.
+     *
+     * @param <F> the type of the source spliterator
+     * @param <R> the type of elements produced by this spliterator
+     * @param <S> the self type for recursive split creation
+     */
     @AllArgsConstructor(access = AccessLevel.PACKAGE)
     private static abstract class MapWithIndexSpliterator<F extends Spliterator<?>, R, S extends StreamUtil.MapWithIndexSpliterator<F, R, S>> implements Spliterator<R> {
 
