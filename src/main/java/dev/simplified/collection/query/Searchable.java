@@ -24,12 +24,7 @@ import java.util.stream.StreamSupport;
 @FunctionalInterface
 public interface Searchable<E> {
 
-    /**
-     * Returns a {@link SingleStream} over the elements of this searchable collection.
-     * This is the abstract method that implementing classes must provide.
-     *
-     * @return a stream of elements
-     */
+    /** A {@link SingleStream} over the elements of this searchable collection. */
     @NotNull SingleStream<E> stream();
 
     /**
@@ -37,8 +32,8 @@ public interface Searchable<E> {
      * When {@code match} is {@link SearchFunction.Match#ALL ALL}, every predicate must match;
      * when {@link SearchFunction.Match#ANY ANY}, at least one predicate must match.
      *
-     * @param match      the match mode (ALL or ANY)
-     * @param compare    the comparison function applied per predicate
+     * @param match the match mode (ALL or ANY)
+     * @param compare the comparison function applied per predicate
      * @param predicates the field-extractor/value pairs to compare against
      * @param <S>        the type of the compared value
      * @return a filtered stream of matching elements
@@ -70,8 +65,8 @@ public interface Searchable<E> {
      * checks against each predicate pair. Behaves like {@link #compare} but operates on
      * list-valued fields.
      *
-     * @param match      the match mode (ALL or ANY)
-     * @param compare    the containment comparison function applied per predicate
+     * @param match the match mode (ALL or ANY)
+     * @param compare the containment comparison function applied per predicate
      * @param predicates the list-field-extractor/value pairs to check containment against
      * @param <S>        the element type within the list field
      * @return a filtered stream of matching elements
@@ -104,7 +99,7 @@ public interface Searchable<E> {
      * Returns all elements whose list-valued field contains the given value, using {@link SearchFunction.Match#ALL ALL} mode.
      *
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return a stream of elements whose list field contains the value
      */
@@ -137,9 +132,9 @@ public interface Searchable<E> {
     /**
      * Returns all elements whose list-valued field contains the given value, using the specified match mode.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return a stream of elements whose list field contains the value
      */
@@ -150,7 +145,7 @@ public interface Searchable<E> {
     /**
      * Returns all elements whose list-valued fields contain the given values, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return a stream of elements matching the containment predicates
@@ -163,7 +158,7 @@ public interface Searchable<E> {
      * Returns all elements whose list-valued fields contain the given values, using the specified match mode.
      * This is the terminal overload that performs the actual containment check.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return a stream of elements matching the containment predicates
@@ -185,7 +180,7 @@ public interface Searchable<E> {
      * Returns all elements whose extracted field value equals the given value, using {@link SearchFunction.Match#ALL ALL} mode.
      *
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return a stream of elements whose field equals the value
      */
@@ -218,9 +213,9 @@ public interface Searchable<E> {
     /**
      * Returns all elements whose extracted field value equals the given value, using the specified match mode.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return a stream of elements whose field equals the value
      */
@@ -231,7 +226,7 @@ public interface Searchable<E> {
     /**
      * Returns all elements matching the given field-extractor/value pairs, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return a stream of elements matching the predicates
@@ -244,7 +239,7 @@ public interface Searchable<E> {
      * Returns all elements matching the given field-extractor/value pairs, using the specified match mode.
      * This is the terminal overload that performs the actual equality comparison via {@link Objects#equals}.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return a stream of elements matching the predicates
@@ -282,7 +277,7 @@ public interface Searchable<E> {
     /**
      * Returns all elements that satisfy the given predicates, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return a stream of elements satisfying the predicates
      */
@@ -294,7 +289,7 @@ public interface Searchable<E> {
      * Returns all elements that satisfy the given predicates, using the specified match mode.
      * This is the terminal overload that converts predicates to comparison pairs and delegates to {@link #compare}.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return a stream of elements satisfying the predicates
      */

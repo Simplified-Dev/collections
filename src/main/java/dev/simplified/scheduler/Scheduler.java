@@ -98,7 +98,7 @@ public final class Scheduler implements Executor {
      * <p>
      * If no task with the specified id exists in the task list, this method is a no-op.
      *
-     * @param id                    the {@linkplain ScheduledTask#getId() task id} to cancel
+     * @param id the {@linkplain ScheduledTask#getId() task id} to cancel
      * @param mayInterruptIfRunning {@code true} to interrupt the executing thread
      */
     public void cancel(@Range(from = 1, to = Long.MAX_VALUE) long id, boolean mayInterruptIfRunning) {
@@ -123,7 +123,7 @@ public final class Scheduler implements Executor {
     /**
      * Cancels the given task, optionally interrupting a running execution.
      *
-     * @param task                  the task to cancel
+     * @param task the task to cancel
      * @param mayInterruptIfRunning {@code true} to interrupt the executing thread
      * @see ScheduledTask#cancel(boolean)
      */
@@ -175,7 +175,7 @@ public final class Scheduler implements Executor {
     /**
      * Schedules a one-shot synchronous task with the specified delay in milliseconds.
      *
-     * @param task  the work to execute
+     * @param task the work to execute
      * @param delay the delay in milliseconds before execution
      * @return the scheduled task handle
      */
@@ -189,9 +189,9 @@ public final class Scheduler implements Executor {
      * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
      * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         the work to execute
+     * @param task the work to execute
      * @param initialDelay the delay in milliseconds before the first execution
-     * @param repeatDelay  the delay in milliseconds between executions ({@code 0} for one-shot)
+     * @param repeatDelay the delay in milliseconds between executions ({@code 0} for one-shot)
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay) {
@@ -204,10 +204,10 @@ public final class Scheduler implements Executor {
      * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
      * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         the work to execute
+     * @param task the work to execute
      * @param initialDelay the delay before the first execution
-     * @param repeatDelay  the delay between executions ({@code 0} for one-shot)
-     * @param timeUnit     the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @param repeatDelay the delay between executions ({@code 0} for one-shot)
+     * @param timeUnit the time unit for {@code initialDelay} and {@code repeatDelay}
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask schedule(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {
@@ -227,7 +227,7 @@ public final class Scheduler implements Executor {
     /**
      * Schedules a one-shot asynchronous task with the specified delay in milliseconds.
      *
-     * @param task         the work to execute
+     * @param task the work to execute
      * @param initialDelay the delay in milliseconds before execution
      * @return the scheduled task handle
      */
@@ -241,9 +241,9 @@ public final class Scheduler implements Executor {
      * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
      * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         the work to execute
+     * @param task the work to execute
      * @param initialDelay the delay in milliseconds before the first execution
-     * @param repeatDelay  the delay in milliseconds between executions ({@code 0} for one-shot)
+     * @param repeatDelay the delay in milliseconds between executions ({@code 0} for one-shot)
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay) {
@@ -256,10 +256,10 @@ public final class Scheduler implements Executor {
      * If {@code repeatDelay} is {@code 0} the task runs once; otherwise it repeats with a
      * fixed delay between the end of one execution and the start of the next.
      *
-     * @param task         the work to execute
+     * @param task the work to execute
      * @param initialDelay the delay before the first execution
-     * @param repeatDelay  the delay between executions ({@code 0} for one-shot)
-     * @param timeUnit     the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @param repeatDelay the delay between executions ({@code 0} for one-shot)
+     * @param timeUnit the time unit for {@code initialDelay} and {@code repeatDelay}
      * @return the scheduled task handle
      */
     public @NotNull ScheduledTask scheduleAsync(@NotNull Runnable task, @Range(from = 0, to = Long.MAX_VALUE) long initialDelay, @Range(from = 0, to = Long.MAX_VALUE) long repeatDelay, @NotNull TimeUnit timeUnit) {

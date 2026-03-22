@@ -314,7 +314,7 @@ public final class Concurrent {
 	/**
 	 * Creates a new {@link ConcurrentLinkedMap} containing all entries from the given map, with a maximum size.
 	 *
-	 * @param map     the source map to copy from
+	 * @param map the source map to copy from
 	 * @param maxSize the maximum number of entries, or {@code -1} for unlimited
 	 * @param <K>     the key type
 	 * @param <V>     the value type
@@ -625,7 +625,7 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentMap}
 	 * using the given key and value mappers. Throws on duplicate keys.
 	 *
-	 * @param keyMapper   the function to extract map keys from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
 	 * @param valueMapper the function to extract map values from stream elements
 	 * @param <K>         the key type
 	 * @param <V>         the value type
@@ -640,8 +640,8 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentMap}
 	 * using the given key mapper, value mapper, and merge function for duplicate keys.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
 	 * @param <K>           the key type
 	 * @param <V>           the value type
@@ -656,10 +656,10 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a map supplied by {@code mapSupplier},
 	 * using the given key mapper, value mapper, and merge function. This is the most general {@code toMap} overload.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
-	 * @param mapSupplier   the supplier providing a new empty map instance
+	 * @param mapSupplier the supplier providing a new empty map instance
 	 * @param <K>           the key type
 	 * @param <V>           the value type
 	 * @param <T>           the stream element type
@@ -754,7 +754,7 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentLinkedMap}
 	 * using the given key and value mappers. Throws on duplicate keys.
 	 *
-	 * @param keyMapper   the function to extract map keys from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
 	 * @param valueMapper the function to extract map values from stream elements
 	 * @param <K>         the key type
 	 * @param <V>         the value type
@@ -769,8 +769,8 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentLinkedMap}
 	 * using the given key mapper, value mapper, and merge function for duplicate keys.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
 	 * @param <K>           the key type
 	 * @param <V>           the value type
@@ -785,10 +785,10 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a linked map supplied by {@code mapSupplier},
 	 * using the given key mapper, value mapper, and merge function. This is the most general {@code toLinkedMap} overload.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
-	 * @param mapSupplier   the supplier providing a new empty linked map instance
+	 * @param mapSupplier the supplier providing a new empty linked map instance
 	 * @param <K>           the key type
 	 * @param <V>           the value type
 	 * @param <T>           the stream element type
@@ -857,7 +857,7 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentUnmodifiableMap}
 	 * using the given key and value mappers. Throws on duplicate keys.
 	 *
-	 * @param keyMapper   the function to extract map keys from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
 	 * @param valueMapper the function to extract map values from stream elements
 	 * @param <K>         the key type
 	 * @param <V>         the value type
@@ -872,8 +872,8 @@ public final class Concurrent {
 	 * Returns a {@link Collector} that accumulates stream elements into a {@link ConcurrentUnmodifiableMap}
 	 * using the given key mapper, value mapper, and merge function for duplicate keys.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
 	 * @param <K>           the key type
 	 * @param <V>           the value type
@@ -889,10 +889,10 @@ public final class Concurrent {
 	 * using the given key mapper, value mapper, merge function, and map supplier.
 	 * This is the most general {@code toUnmodifiableMap} overload.
 	 *
-	 * @param keyMapper     the function to extract map keys from stream elements
-	 * @param valueMapper   the function to extract map values from stream elements
+	 * @param keyMapper the function to extract map keys from stream elements
+	 * @param valueMapper the function to extract map values from stream elements
 	 * @param mergeFunction the function to resolve collisions between values associated with the same key
-	 * @param mapSupplier   the supplier providing a new empty mutable map used during accumulation
+	 * @param mapSupplier the supplier providing a new empty mutable map used during accumulation
 	 * @param <K>           the key type
 	 * @param <V>           the value type
 	 * @param <T>           the stream element type

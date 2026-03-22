@@ -96,12 +96,12 @@ public final class ScheduledTask implements Runnable {
      * sleeping yields the carrier thread rather than blocking a platform thread.
      *
      * @param executorService the executor that will run this task
-     * @param task            the work to execute
-     * @param initialDelay    the delay before the first execution
-     * @param repeatDelay          the delay between end-of-execution and the next start ({@code 0} for one-shot)
-     * @param timeUnit        the time unit for {@code initialDelay} and {@code repeatDelay}
-     * @param async           {@code true} for self-scheduled virtual-thread execution;
-     *                        {@code false} for platform-thread scheduling
+     * @param task the work to execute
+     * @param initialDelay the delay before the first execution
+     * @param repeatDelay the delay between end-of-execution and the next start ({@code 0} for one-shot)
+     * @param timeUnit the time unit for {@code initialDelay} and {@code repeatDelay}
+     * @param async {@code true} for self-scheduled virtual-thread execution;
+     *     {@code false} for platform-thread scheduling
      */
     ScheduledTask(
         @NotNull ExecutorService executorService,

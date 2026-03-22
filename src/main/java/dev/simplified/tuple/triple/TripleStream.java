@@ -77,7 +77,7 @@ public interface TripleStream<L, M, R> extends SingleStream<Triple<L, M, R>> {
      * @param <R>    the right element type
      * @param stream a stream of left elements
      * @param middle a function producing the middle element from each left element
-     * @param right  a function producing the right element from each left element
+     * @param right a function producing the right element from each left element
      * @return a {@code TripleStream} of constructed triples
      */
     static <L, M, R> @NotNull TripleStream<L, M, R> of(@NotNull Stream<L> stream, @NotNull Function<? super L, ? extends M> middle, @NotNull Function<? super L, ? extends R> right) {

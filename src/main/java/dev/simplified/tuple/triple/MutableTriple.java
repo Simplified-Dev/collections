@@ -37,9 +37,9 @@ public final class MutableTriple<L, M, R> implements Triple<L, M, R> {
      * @param <L>    the left element type
      * @param <M>    the middle element type
      * @param <R>    the right element type
-     * @param left   the left element, may be null
+     * @param left the left element, may be null
      * @param middle the middle element, may be null
-     * @param right  the right element, may be null
+     * @param right the right element, may be null
      * @return a mutable triple formed from the three parameters, not null
      */
     public static <L, M, R> @NotNull MutableTriple<L, M, R> of(@Nullable L left, @Nullable M middle, @Nullable R right) {

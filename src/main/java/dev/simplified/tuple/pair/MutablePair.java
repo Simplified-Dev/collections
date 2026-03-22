@@ -30,7 +30,7 @@ public final class MutablePair<L, R> implements Pair<L, R> {
     /**
      * Creates a new mutable pair with the specified values.
      *
-     * @param left  the left value, may be null
+     * @param left the left value, may be null
      * @param right the right value, may be null
      */
     public MutablePair(@Nullable L left, @Nullable R right) {
@@ -43,7 +43,7 @@ public final class MutablePair<L, R> implements Pair<L, R> {
      *
      * @param <L>   the left element type
      * @param <R>   the right element type
-     * @param left  the left element, may be null
+     * @param left the left element, may be null
      * @param right the right element, may be null
      * @return a mutable pair formed from the two parameters, not null
      */

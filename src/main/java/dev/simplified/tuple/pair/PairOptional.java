@@ -69,7 +69,7 @@ public final class PairOptional<L, R> {
      * Returns a {@code PairOptional} describing the given key-value pair.
      * The left value must be non-{@code null}; the right value may be {@code null}.
      *
-     * @param left  the left value to describe, must be non-{@code null}
+     * @param left the left value to describe, must be non-{@code null}
      * @param right the right value to describe, may be {@code null}
      * @param <L>   the type of the left value
      * @param <R>   the type of the right value
@@ -112,7 +112,7 @@ public final class PairOptional<L, R> {
      * Returns a {@code PairOptional} describing the given left and right values, or an empty
      * {@code PairOptional} if {@code left} is {@code null}.
      *
-     * @param left  the possibly-{@code null} left value to describe
+     * @param left the possibly-{@code null} left value to describe
      * @param right the possibly-{@code null} right value to describe
      * @param <L>   the type of the left value
      * @param <R>   the type of the right value
@@ -244,7 +244,7 @@ public final class PairOptional<L, R> {
      * If a value is present, performs the given action with the pair, otherwise performs
      * the given empty-based action.
      *
-     * @param action      the action to be performed if a value is present
+     * @param action the action to be performed if a value is present
      * @param emptyAction the action to be performed if no value is present
      */
     public void ifPresentOrElse(@NotNull Consumer<? super Pair<L, R>> action, @NotNull Runnable emptyAction) {
@@ -258,7 +258,7 @@ public final class PairOptional<L, R> {
      * If a value is present, performs the given action with the left and right elements
      * supplied separately, otherwise performs the given empty-based action.
      *
-     * @param action      a {@link BiConsumer} receiving the left and right elements
+     * @param action a {@link BiConsumer} receiving the left and right elements
      * @param emptyAction the action to be performed if no value is present
      */
     public void ifPresentOrElse(@NotNull BiConsumer<? super L, ? super R> action, @NotNull Runnable emptyAction) {
@@ -393,7 +393,7 @@ public final class PairOptional<L, R> {
      * Unlike {@link #map(Function)}, the mapping function already returns an {@link Optional},
      * so {@code flatMap} does not wrap it in an additional layer.
      *
-     * @param mapper  the mapping function to apply to the pair, if present
+     * @param mapper the mapping function to apply to the pair, if present
      * @param <UL>    the left type of the pair returned by the mapping function
      * @param <UR>    the right type of the pair returned by the mapping function
      * @return the result of applying the mapping function, or an empty {@link Optional}
@@ -411,7 +411,7 @@ public final class PairOptional<L, R> {
      * the left and right elements and returns the result, otherwise returns an empty
      * {@code PairOptional}.
      *
-     * @param mapper  a function receiving the left and right elements, returning a {@code PairOptional}
+     * @param mapper a function receiving the left and right elements, returning a {@code PairOptional}
      * @param <UL>    the left type of the resulting {@code PairOptional}
      * @param <UR>    the right type of the resulting {@code PairOptional}
      * @return the result of applying the mapping function, or an empty {@code PairOptional}

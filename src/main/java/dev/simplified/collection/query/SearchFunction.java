@@ -20,7 +20,7 @@ public interface SearchFunction<T, R> extends Function<T, R> {
      * nested method references (e.g., {@code combine(Entity::getChild, Child::getName)}).
      *
      * @param from the first function in the chain
-     * @param to   the next function in the chain
+     * @param to the next function in the chain
      * @param <T1> the input type of the first function
      * @param <T2> the intermediate type (output of {@code from}, input of {@code to})
      * @param <T3> the final return type

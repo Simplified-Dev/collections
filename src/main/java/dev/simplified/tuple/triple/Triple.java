@@ -28,34 +28,22 @@ public interface Triple<L, M, R> extends Comparable<Triple<L, M, R>> {
      * @param <L>    the left element type
      * @param <M>    the middle element type
      * @param <R>    the right element type
-     * @param left   the left element, may be null
+     * @param left the left element, may be null
      * @param middle the middle element, may be null
-     * @param right  the right element, may be null
+     * @param right the right element, may be null
      * @return an immutable triple formed from the three parameters, not null
      */
     static <L, M, R> @NotNull Triple<L, M, R> of(@Nullable L left, @Nullable M middle, @Nullable R right) {
         return new ImmutableTriple<>(left, middle, right);
     }
 
-    /**
-     * Gets the left element from this triple.
-     *
-     * @return the left element, may be null
-     */
+    /** The left element of this triple. */
     L getLeft();
 
-    /**
-     * Gets the middle element from this triple.
-     *
-     * @return the middle element, may be null
-     */
+    /** The middle element of this triple. */
     M getMiddle();
 
-    /**
-     * Gets the right element from this triple.
-     *
-     * @return the right element, may be null
-     */
+    /** The right element of this triple. */
     R getRight();
 
     /**

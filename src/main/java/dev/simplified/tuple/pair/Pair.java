@@ -28,7 +28,7 @@ public interface Pair<L, R> extends Map.Entry<L, R>, Comparable<Pair<L, R>> {
      *
      * @param <L>   the left element type
      * @param <R>   the right element type
-     * @param left  the left element, may be null
+     * @param left the left element, may be null
      * @param right the right element, may be null
      * @return an immutable pair formed from the two parameters, not null
      */
@@ -60,22 +60,10 @@ public interface Pair<L, R> extends Map.Entry<L, R>, Comparable<Pair<L, R>> {
         return new ImmutablePair<>(null, null);
     }
 
-    /**
-     * Gets the left element from this pair.
-     * <p>
-     * When treated as a key-value pair, this is the key.
-     *
-     * @return the left element, may be null
-     */
+    /** The left element of this pair. When treated as a key-value pair, this is the key. */
     L getLeft();
 
-    /**
-     * Gets the right element from this pair.
-     * <p>
-     * When treated as a key-value pair, this is the value.
-     *
-     * @return the right element, may be null
-     */
+    /** The right element of this pair. When treated as a key-value pair, this is the value. */
     R getRight();
 
     /**

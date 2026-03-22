@@ -391,7 +391,7 @@ public interface SingleStream<E> extends Stream<E> {
      *
      * @param <K>         the type of the pair key
      * @param <V>         the type of the pair value
-     * @param keyMapper   a function producing the key from each element
+     * @param keyMapper a function producing the key from each element
      * @param valueMapper a function producing the value from each element
      * @return a {@link PairStream} of mapped key-value pairs
      */
@@ -419,7 +419,7 @@ public interface SingleStream<E> extends Stream<E> {
      * @param <M>          the type of the triple middle element
      * @param <R>          the type of the triple right element
      * @param middleMapper a function producing the middle value from each element
-     * @param rightMapper  a function producing the right value from each element
+     * @param rightMapper a function producing the right value from each element
      * @return a {@link TripleStream} of {@code (element, middle, right)} triples
      */
     default <M, R> @NotNull TripleStream<E, M, R> expandToTriple(@NotNull Function<? super E, ? extends M> middleMapper, @NotNull Function<? super E, ? extends R> rightMapper) {
@@ -432,9 +432,9 @@ public interface SingleStream<E> extends Stream<E> {
      * @param <L>          the type of the triple left element
      * @param <M>          the type of the triple middle element
      * @param <R>          the type of the triple right element
-     * @param leftMapper   a function producing the left value from each element
+     * @param leftMapper a function producing the left value from each element
      * @param middleMapper a function producing the middle value from each element
-     * @param rightMapper  a function producing the right value from each element
+     * @param rightMapper a function producing the right value from each element
      * @return a {@link TripleStream} of fully mapped triples
      */
     default <L, M, R> @NotNull TripleStream<L, M, R> expandToTriple(@NotNull Function<? super E, ? extends L> leftMapper, @NotNull Function<? super E, ? extends M> middleMapper, @NotNull Function<? super E, ? extends R> rightMapper) {

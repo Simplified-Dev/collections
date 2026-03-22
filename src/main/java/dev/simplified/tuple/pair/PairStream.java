@@ -640,9 +640,9 @@ public interface PairStream<K, V> extends SingleStream<Map.Entry<K, V>> {
      * parallel execution.
      *
      * @param <U>         the type of the result
-     * @param identity    the identity value for the accumulator
+     * @param identity the identity value for the accumulator
      * @param accumulator a function that folds a key-value pair into the result
-     * @param combiner    a function to combine two partial results in parallel execution
+     * @param combiner a function to combine two partial results in parallel execution
      * @return the reduced result
      */
     default <U> @NotNull U reduce(@NotNull U identity, @NotNull TriFunction<U, ? super K, ? super V, U> accumulator, @NotNull BinaryOperator<U> combiner) {

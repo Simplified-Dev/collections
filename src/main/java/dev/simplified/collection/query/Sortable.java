@@ -27,7 +27,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element whose list-valued field contains the given value, using {@link SearchFunction.Match#ALL ALL} mode.
      *
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -38,9 +38,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose list-valued field contains the given value, using the specified match mode.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -73,7 +73,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose list-valued fields contain the given values, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return an {@link Optional} containing the first matching element, or empty if none match
@@ -86,7 +86,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element whose list-valued fields contain the given values, using the specified match mode.
      * This is the terminal overload that delegates to {@link #containsAll} and takes the first result.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return an {@link Optional} containing the first matching element, or empty if none match
@@ -99,7 +99,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element whose list-valued field contains the given value, or {@code null} if none match.
      *
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return the first matching element, or {@code null}
      */
@@ -110,9 +110,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose list-valued field contains the given value using the specified match mode, or {@code null} if none match.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the list-field extractor
-     * @param value    the value to check for containment
+     * @param value the value to check for containment
      * @param <S>      the element type within the list field
      * @return the first matching element, or {@code null}
      */
@@ -123,7 +123,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose list-valued fields contain the given values using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return the first matching element, or {@code null}
@@ -135,7 +135,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose list-valued fields contain the given values using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the list-field-extractor/value pairs to check
      * @param <S>        the element type within the list field
      * @return the first matching element, or {@code null}
@@ -172,7 +172,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element whose extracted field value equals the given value, using {@link SearchFunction.Match#ALL ALL} mode.
      *
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -183,9 +183,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose extracted field value equals the given value, using the specified match mode.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -218,7 +218,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element matching the given field-extractor/value pairs, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return an {@link Optional} containing the first matching element, or empty if none match
@@ -231,7 +231,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element matching the given field-extractor/value pairs, using the specified match mode.
      * This is the terminal overload that performs null-safe equality comparison and returns the first result.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return an {@link Optional} containing the first matching element, or empty if none match
@@ -254,7 +254,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element whose extracted field value equals the given value, or {@code null} if none match.
      *
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return the first matching element, or {@code null}
      */
@@ -265,9 +265,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element whose extracted field value equals the given value using the specified match mode, or {@code null} if none match.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return the first matching element, or {@code null}
      */
@@ -278,7 +278,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element matching the given field-extractor/value pairs using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return the first matching element, or {@code null}
@@ -290,7 +290,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element matching the given field-extractor/value pairs using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return the first matching element, or {@code null}
@@ -327,7 +327,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the last element whose extracted field value equals the given value, using {@link SearchFunction.Match#ALL ALL} mode.
      *
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return an {@link Optional} containing the last matching element, or empty if none match
      */
@@ -338,9 +338,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element whose extracted field value equals the given value, using the specified match mode.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return an {@link Optional} containing the last matching element, or empty if none match
      */
@@ -373,7 +373,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element matching the given field-extractor/value pairs, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return an {@link Optional} containing the last matching element, or empty if none match
@@ -386,7 +386,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the last element matching the given field-extractor/value pairs, using the specified match mode.
      * This is the terminal overload that performs null-safe equality comparison and reduces to the last result.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return an {@link Optional} containing the last matching element, or empty if none match
@@ -411,7 +411,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the last element whose extracted field value equals the given value, or {@code null} if none match.
      *
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return the last matching element, or {@code null}
      */
@@ -422,9 +422,9 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element whose extracted field value equals the given value using the specified match mode, or {@code null} if none match.
      *
-     * @param match    the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param function the field extractor
-     * @param value    the value to compare against
+     * @param value the value to compare against
      * @param <S>      the type of the compared value
      * @return the last matching element, or {@code null}
      */
@@ -435,7 +435,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element matching the given field-extractor/value pairs using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return the last matching element, or {@code null}
@@ -447,7 +447,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element matching the given field-extractor/value pairs using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the field-extractor/value pairs to match
      * @param <S>        the type of the compared value
      * @return the last matching element, or {@code null}
@@ -503,7 +503,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element that satisfies the given predicates, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -515,7 +515,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the first element that satisfies the given predicates, using the specified match mode.
      * This is the terminal overload that converts predicates to comparison pairs and returns the first result.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return an {@link Optional} containing the first matching element, or empty if none match
      */
@@ -558,7 +558,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element that satisfies the given predicates using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return the first matching element, or {@code null}
      */
@@ -569,7 +569,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the first element that satisfies the given predicates using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return the first matching element, or {@code null}
      */
@@ -602,7 +602,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element that satisfies the given predicates, using the specified match mode.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return an {@link Optional} containing the last matching element, or empty if none match
      */
@@ -614,7 +614,7 @@ public interface Sortable<E> extends Searchable<E> {
      * Returns the last element that satisfies the given predicates, using the specified match mode.
      * This is the terminal overload that converts predicates to comparison pairs and reduces to the last result.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return an {@link Optional} containing the last matching element, or empty if none match
      */
@@ -657,7 +657,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element that satisfies the given predicates using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return the last matching element, or {@code null}
      */
@@ -668,7 +668,7 @@ public interface Sortable<E> extends Searchable<E> {
     /**
      * Returns the last element that satisfies the given predicates using the specified match mode, or {@code null} if none match.
      *
-     * @param match      the match mode (ALL or ANY)
+     * @param match the match mode (ALL or ANY)
      * @param predicates the predicates to test against each element
      * @return the last matching element, or {@code null}
      */
