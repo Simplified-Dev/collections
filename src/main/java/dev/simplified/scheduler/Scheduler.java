@@ -53,7 +53,12 @@ public final class Scheduler implements Executor {
      * async executor.
      */
     public Scheduler() {
-        this.syncExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.syncExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setDaemon(true);
+            thread.setName("scheduler-sync");
+            return thread;
+        });
         this.virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
         // Schedule Permanent Cleaner
