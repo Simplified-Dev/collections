@@ -70,6 +70,8 @@ public final class Scheduler implements Executor {
             TimeUnit.MILLISECONDS,
             false
         );
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "scheduler-shutdown"));
     }
 
     /**
