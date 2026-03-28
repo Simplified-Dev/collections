@@ -2,6 +2,7 @@ package dev.sbs.api.scheduler;
 
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentList;
+import dev.sbs.api.collection.concurrent.ConcurrentSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -72,6 +73,28 @@ public final class Scheduler implements Executor {
         );
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "scheduler-shutdown"));
+    }
+
+    /**
+     * Returns the set of non-daemon, non-JVM threads that are still alive.
+     * <p>
+     * Useful for diagnosing thread leaks after shutdown. Filters out JVM-internal threads
+     * ({@code main}, {@code Reference Handler}, {@code Signal Dispatcher}, {@code Notification Thread},
+     * {@code Finalizer}), Gradle worker threads, and test worker threads.
+     *
+     * @return an unmodifiable set of leaked non-daemon threads
+     */
+    public static @NotNull ConcurrentSet<Thread> leakedThreads() {
+        return Thread.getAllStackTraces().keySet().stream()
+            .filter(t -> !t.isDaemon() && t.isAlive())
+            .filter(t -> !t.getName().equals("main"))
+            .filter(t -> !t.getName().startsWith("Reference Handler"))
+            .filter(t -> !t.getName().startsWith("Signal Dispatcher"))
+            .filter(t -> !t.getName().startsWith("Notification"))
+            .filter(t -> !t.getName().startsWith("Finalizer"))
+            .filter(t -> !t.getName().contains("workers"))
+            .filter(t -> !t.getName().startsWith("Test worker"))
+            .collect(Concurrent.toUnmodifiableSet());
     }
 
     /**
