@@ -1,5 +1,7 @@
 package dev.sbs.api.tuple.single;
 
+import dev.sbs.api.collection.concurrent.Concurrent;
+import dev.sbs.api.collection.concurrent.ConcurrentList;
 import dev.sbs.api.tuple.pair.Pair;
 import dev.sbs.api.tuple.pair.PairStream;
 import dev.sbs.api.tuple.triple.Triple;
@@ -370,6 +372,34 @@ public interface SingleStream<E> extends Stream<E> {
     @Override
     default <A> @NotNull A @NotNull [] toArray(@NotNull IntFunction<A[]> generator) {
         return this.underlying().toArray(generator);
+    }
+
+    /**
+     * Accumulates the elements of this stream into a {@link ConcurrentList}.
+     *
+     * @return a {@code ConcurrentList} containing the stream elements
+     */
+    @Override
+    default @NotNull ConcurrentList<E> toList() {
+        return this.collect(Concurrent.toList());
+    }
+
+    /**
+     * Accumulates the elements of this stream into a linked {@link ConcurrentList}.
+     *
+     * @return a linked {@code ConcurrentList} containing the stream elements
+     */
+    default @NotNull ConcurrentList<E> toLinkedList() {
+        return this.collect(Concurrent.toLinkedList());
+    }
+
+    /**
+     * Accumulates the elements of this stream into an unmodifiable {@link ConcurrentList}.
+     *
+     * @return an unmodifiable {@code ConcurrentList} containing the stream elements
+     */
+    default @NotNull ConcurrentList<E> toUnmodifiableList() {
+        return this.collect(Concurrent.toUnmodifiableList());
     }
 
     // Expand

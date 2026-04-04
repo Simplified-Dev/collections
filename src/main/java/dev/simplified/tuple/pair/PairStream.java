@@ -1,5 +1,7 @@
 package dev.sbs.api.tuple.pair;
 
+import dev.sbs.api.collection.concurrent.Concurrent;
+import dev.sbs.api.collection.concurrent.ConcurrentMap;
 import dev.sbs.api.function.TriFunction;
 import dev.sbs.api.tuple.single.SingleStream;
 import dev.sbs.api.tuple.triple.Triple;
@@ -722,6 +724,36 @@ public interface PairStream<K, V> extends SingleStream<Map.Entry<K, V>> {
     @Override
     default <A> @NotNull A @NotNull [] toArray(@NotNull IntFunction<A[]> generator) {
         return this.underlying().toArray(generator);
+    }
+
+    /**
+     * Accumulates the entries of this stream into a {@link ConcurrentMap}.
+     *
+     * @return a {@code ConcurrentMap} containing the stream entries
+     * @throws IllegalStateException on duplicate keys
+     */
+    default @NotNull ConcurrentMap<K, V> toMap() {
+        return this.collect(Concurrent.toMap());
+    }
+
+    /**
+     * Accumulates the entries of this stream into a linked {@link ConcurrentMap}.
+     *
+     * @return a linked {@code ConcurrentMap} containing the stream entries
+     * @throws IllegalStateException on duplicate keys
+     */
+    default @NotNull ConcurrentMap<K, V> toLinkedMap() {
+        return this.collect(Concurrent.toLinkedMap());
+    }
+
+    /**
+     * Accumulates the entries of this stream into an unmodifiable {@link ConcurrentMap}.
+     *
+     * @return an unmodifiable {@code ConcurrentMap} containing the stream entries
+     * @throws IllegalStateException on duplicate keys
+     */
+    default @NotNull ConcurrentMap<K, V> toUnmodifiableMap() {
+        return this.collect(Concurrent.toUnmodifiableMap());
     }
 
     // Collapse
