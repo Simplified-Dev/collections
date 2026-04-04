@@ -3,6 +3,7 @@ package dev.sbs.api.collection.concurrent;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedList;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedMap;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedSet;
+import dev.sbs.api.collection.concurrent.sorted.ConcurrentSortedMap;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableCollection;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableLinkedList;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableList;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -323,6 +325,56 @@ public final class Concurrent {
 	 */
 	public static <K, V> @NotNull ConcurrentLinkedMap<K, V> newLinkedMap(@NotNull Map<? extends K, ? extends V> map, int maxSize) {
 		return new ConcurrentLinkedMap<>(map, maxSize);
+	}
+
+	/**
+	 * Creates a new empty {@link ConcurrentSortedMap} with natural key ordering.
+	 *
+	 * @param <K> the key type
+	 * @param <V> the value type
+	 * @return a new empty concurrent sorted map
+	 */
+	public static <K, V> @NotNull ConcurrentSortedMap<K, V> newSortedMap() {
+		return new ConcurrentSortedMap<>();
+	}
+
+	/**
+	 * Creates a new empty {@link ConcurrentSortedMap} with the specified comparator.
+	 *
+	 * @param comparator the comparator used to order the keys
+	 * @param <K>        the key type
+	 * @param <V>        the value type
+	 * @return a new empty concurrent sorted map ordered by the given comparator
+	 */
+	public static <K, V> @NotNull ConcurrentSortedMap<K, V> newSortedMap(@NotNull Comparator<? super K> comparator) {
+		return new ConcurrentSortedMap<>(comparator);
+	}
+
+	/**
+	 * Creates a new {@link ConcurrentSortedMap} containing all entries from the given map,
+	 * with natural key ordering.
+	 *
+	 * @param map the source map to copy from
+	 * @param <K> the key type
+	 * @param <V> the value type
+	 * @return a new concurrent sorted map containing the source entries
+	 */
+	public static <K, V> @NotNull ConcurrentSortedMap<K, V> newSortedMap(@NotNull Map<? extends K, ? extends V> map) {
+		return new ConcurrentSortedMap<>(map);
+	}
+
+	/**
+	 * Creates a new {@link ConcurrentSortedMap} containing all entries from the given map,
+	 * ordered by the specified comparator.
+	 *
+	 * @param comparator the comparator used to order the keys
+	 * @param map        the source map to copy from
+	 * @param <K>        the key type
+	 * @param <V>        the value type
+	 * @return a new concurrent sorted map containing the source entries ordered by the given comparator
+	 */
+	public static <K, V> @NotNull ConcurrentSortedMap<K, V> newSortedMap(@NotNull Comparator<? super K> comparator, @NotNull Map<? extends K, ? extends V> map) {
+		return new ConcurrentSortedMap<>(comparator, map);
 	}
 
 	/**
