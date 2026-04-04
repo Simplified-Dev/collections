@@ -4,6 +4,7 @@ import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedList;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedMap;
 import dev.sbs.api.collection.concurrent.linked.ConcurrentLinkedSet;
 import dev.sbs.api.collection.concurrent.sorted.ConcurrentSortedMap;
+import dev.sbs.api.collection.concurrent.sorted.ConcurrentSortedSet;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableCollection;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableLinkedList;
 import dev.sbs.api.collection.concurrent.unmodifiable.ConcurrentUnmodifiableList;
@@ -386,6 +387,52 @@ public final class Concurrent {
 	 */
 	public static <K, V> @NotNull ConcurrentSortedMap<K, V> newSortedMap(@NotNull Comparator<? super K> comparator, @NotNull Map<? extends K, ? extends V> map) {
 		return new ConcurrentSortedMap<>(comparator, map);
+	}
+
+	/**
+	 * Creates a new empty {@link ConcurrentSortedSet} with natural element ordering.
+	 *
+	 * @param <E> the element type
+	 * @return a new empty concurrent sorted set
+	 */
+	public static <E> @NotNull ConcurrentSortedSet<E> newSortedSet() {
+		return new ConcurrentSortedSet<>();
+	}
+
+	/**
+	 * Creates a new empty {@link ConcurrentSortedSet} with the specified comparator.
+	 *
+	 * @param comparator the comparator used to order the elements
+	 * @param <E>        the element type
+	 * @return a new empty concurrent sorted set ordered by the given comparator
+	 */
+	public static <E> @NotNull ConcurrentSortedSet<E> newSortedSet(@NotNull Comparator<? super E> comparator) {
+		return new ConcurrentSortedSet<>(comparator);
+	}
+
+	/**
+	 * Creates a new {@link ConcurrentSortedSet} containing all elements from the given collection,
+	 * with natural element ordering.
+	 *
+	 * @param collection the source collection to copy from
+	 * @param <E>        the element type
+	 * @return a new concurrent sorted set containing the source elements
+	 */
+	public static <E> @NotNull ConcurrentSortedSet<E> newSortedSet(@NotNull Collection<? extends E> collection) {
+		return new ConcurrentSortedSet<>(collection);
+	}
+
+	/**
+	 * Creates a new {@link ConcurrentSortedSet} containing all elements from the given collection,
+	 * ordered by the specified comparator.
+	 *
+	 * @param comparator the comparator used to order the elements
+	 * @param collection the source collection to copy from
+	 * @param <E>        the element type
+	 * @return a new concurrent sorted set containing the source elements ordered by the given comparator
+	 */
+	public static <E> @NotNull ConcurrentSortedSet<E> newSortedSet(@NotNull Comparator<? super E> comparator, @NotNull Collection<? extends E> collection) {
+		return new ConcurrentSortedSet<>(comparator, collection);
 	}
 
 	/**
