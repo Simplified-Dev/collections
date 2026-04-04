@@ -38,6 +38,13 @@ public class ConcurrentList<E> extends AtomicList<E, List<E>> {
 	}
 
 	/**
+	 * Create a new concurrent list with an initial capacity.
+	 */
+	public ConcurrentList(int initialCapacity) {
+		super(new ArrayList<>(initialCapacity));
+	}
+
+	/**
 	 * Create a new concurrent list and fill it with the given collection.
 	 */
 	public ConcurrentList(@Nullable Collection<? extends E> collection) {

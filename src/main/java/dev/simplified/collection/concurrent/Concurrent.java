@@ -134,6 +134,17 @@ public final class Concurrent {
 	/**
 	 * Creates a new {@link ConcurrentList} containing the given elements.
 	 *
+	 * @param initialCapacity the initial capacity of the underlying list
+	 * @param <E>             the element type
+	 * @return a new concurrent list containing the specified elements
+	 */
+	public static <E> @NotNull ConcurrentList<E> newList(int initialCapacity) {
+		return new ConcurrentList<>(initialCapacity);
+	}
+
+	/**
+	 * Creates a new {@link ConcurrentList} containing the given elements.
+	 *
 	 * @param array the elements to include
 	 * @param <E>   the element type
 	 * @return a new concurrent list containing the specified elements
