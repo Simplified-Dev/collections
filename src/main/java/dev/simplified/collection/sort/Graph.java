@@ -3,7 +3,6 @@ package dev.sbs.api.collection.sort;
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.collection.concurrent.ConcurrentList;
 import dev.sbs.api.collection.concurrent.ConcurrentMap;
-import dev.sbs.api.util.builder.ClassBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -106,7 +105,7 @@ public class Graph<T> {
      * @param <T> the type of values stored in graph nodes
      */
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class Builder<T> implements ClassBuilder<Graph<T>> {
+    public static class Builder<T> {
 
         private final T type;
         private final ConcurrentList<T> values = Concurrent.newList();
@@ -178,7 +177,6 @@ public class Graph<T> {
          *
          * @return the constructed graph
          */
-        @Override
         public @NotNull Graph<T> build() {
             // Handle Edge Function
             this.edgeFunction.ifPresent(edgeFunction -> this.values.forEach(value -> edgeFunction.apply(value)
