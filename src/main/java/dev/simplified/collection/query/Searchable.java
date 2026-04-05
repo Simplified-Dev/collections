@@ -2,7 +2,6 @@ package dev.sbs.api.collection.query;
 
 import dev.sbs.api.collection.concurrent.Concurrent;
 import dev.sbs.api.function.TriPredicate;
-import dev.sbs.api.persistence.exception.JpaException;
 import dev.sbs.api.tuple.pair.Pair;
 import dev.sbs.api.tuple.single.SingleStream;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +54,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, S>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw new JpaException("Invalid match type '%s'", match);
+            throw new IllegalArgumentException(String.format("Invalid match type '%s'", match));
 
         return itemsCopy;
     }
@@ -88,7 +87,7 @@ public interface Searchable<E> {
             for (Pair<Function<E, List<S>>, S> predicate : predicates)
                 itemsCopy = itemsCopy.filter(it -> compare.test(predicate.getLeft(), it, predicate.getRight()));
         } else
-            throw new JpaException("Invalid match type '%s'", match);
+            throw new IllegalArgumentException(String.format("Invalid match type '%s'", match));
 
         return itemsCopy;
     }
